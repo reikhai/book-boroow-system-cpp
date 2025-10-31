@@ -1,5 +1,5 @@
-#include <sqlite3.h>
-
+#include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 // Menu的header
 // 用来declare有这个function
 #include "../book/add_book.h"
-
-using namespace std;
 
 struct User {
    int id;
@@ -23,202 +23,176 @@ struct User {
    string created_at;
 };
 
-void getAdminsListing(sqlite3* db) {
-   string sql =
-       "SELECT id, username, type, locked, attempts, created_at FROM users "
-       "WHERE type IN ('admin', 'super_admin')";
-   sqlite3_stmt* stmt;
+const string USER_FILE = "database/users.txt";
 
-   if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-      cout << "❌ Failed to prepare admin listing query.\n";
-      return;
+vector<User> loadUsers() {
+   vector<User> users;
+   ifstream file(USER_FILE);
+   if (!file.is_open()) {
+      cout << "⚠️ Warning: users.txt not found.\n";
+      return users;
    }
 
-   cout << "\n===== Admin Listing =====\n\n";
+   string line;
+   while (getline(file, line)) {
+      if (line.empty()) continue;
 
-   // Table Header
+      stringstream ss(line);
+      User u;
+      string attemptsStr, lockedStr;
+
+      getline(ss, line, '|');
+      u.id = stoi(line);
+      getline(ss, u.username, '|');
+      getline(ss, u.password, '|');
+      getline(ss, attemptsStr, '|');
+      u.attempts = stoi(attemptsStr);
+      getline(ss, lockedStr, '|');
+      u.locked = stoi(lockedStr);
+      getline(ss, u.type, '|');
+      getline(ss, u.created_at, '|');
+
+      users.push_back(u);
+   }
+   return users;
+}
+
+void saveUsers(const vector<User>& users) {
+   ofstream file(USER_FILE);
+   for (auto& u : users) {
+      file << u.id << "|" << u.username << "|" << u.password << "|"
+           << u.attempts << "|" << u.locked << "|" << u.type << "|"
+           << u.created_at << "\n";
+   }
+}
+
+bool getUser(const vector<User>& users, const string& username, User& user) {
+   for (auto& u : users) {
+      if (u.username == username) {
+         user = u;
+         return true;
+      }
+   }
+   return false;
+}
+
+void updateUser(const User& user, vector<User>& users) {
+   for (auto& u : users) {
+      if (u.id == user.id) {
+         u = user;
+         saveUsers(users);
+         return;
+      }
+   }
+}
+
+void getAdminsListing(const vector<User>& users) {
+   cout << "\n===== Admin Listing =====\n\n";
    cout << left << setw(5) << "ID" << setw(15) << "Username" << setw(15)
         << "Role" << setw(10) << "Locked" << setw(10) << "Attempts" << setw(20)
         << "Created At" << endl;
 
    cout << string(75, '-') << endl;
 
-   // Table Rows
-   while (sqlite3_step(stmt) == SQLITE_ROW) {
-      int id = sqlite3_column_int(stmt, 0);
-      string username = (const char*)sqlite3_column_text(stmt, 1);
-      string type = (const char*)sqlite3_column_text(stmt, 2);
-      int locked = sqlite3_column_int(stmt, 3);
-      int attempts = sqlite3_column_int(stmt, 4);
-      string created_at = (const char*)sqlite3_column_text(stmt, 5);
-
-      cout << left << setw(5) << id << setw(15) << username << setw(15) << type
-           << setw(10) << (locked ? "YES" : "NO") << setw(10) << attempts
-           << setw(20) << created_at << endl;
+   for (auto& u : users) {
+      if (u.type == "admin" || u.type == "super_admin") {
+         cout << left << setw(5) << u.id << setw(15) << u.username << setw(15)
+              << u.type << setw(10) << (u.locked ? "YES" : "NO") << setw(10)
+              << u.attempts << setw(20) << u.created_at << endl;
+      }
    }
 
-   sqlite3_finalize(stmt);
-
    cout << "\nPress Enter to return to menu...";
-   cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+   cin.ignore();
    cin.get();
 }
 
-bool getUser(sqlite3* db, const string& username, User& user) {
-   string sql =
-       "SELECT id, username, password, attempts, locked, type, created_at FROM "
-       "users WHERE username = ?";
-   sqlite3_stmt* stmt;
-
-   sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
-   sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-
-   if (sqlite3_step(stmt) == SQLITE_ROW) {
-      user.id = sqlite3_column_int(stmt, 0);
-      user.username = (const char*)sqlite3_column_text(stmt, 1);
-      user.password = (const char*)sqlite3_column_text(stmt, 2);
-      user.attempts = sqlite3_column_int(stmt, 3);
-      user.locked = sqlite3_column_int(stmt, 4);
-      user.type = (const char*)sqlite3_column_text(stmt, 5);
-      user.created_at = (const char*)sqlite3_column_text(stmt, 6);
-      sqlite3_finalize(stmt);
-      return true;
-   }
-
-   sqlite3_finalize(stmt);
-   return false;
-}
-
-void addAdmin(sqlite3* db) {
+void addAdmin(vector<User>& users) {
    string username, password, type;
    int roleChoice;
 
    cout << "\n=== Add New Admin ===\n";
    cout << "Enter new admin username: ";
    cin >> username;
-   cout << "Enter password for new admin: ";
+
+   // check duplicate username
+   for (auto& u : users) {
+      if (u.username == username) {
+         cout << "❌ Error: Username already exists. Try another.\n";
+         return;
+      }
+   }
+
+   cout << "Enter password: ";
    cin >> password;
 
-   cout << "\nSelect User Role:\n";
-   cout << "1. super_admin\n";
-   cout << "2. admin\n";
-   cout << "Choose: ";
+   cout << "\nSelect Role:\n1. super_admin\n2. admin\nChoose: ";
    cin >> roleChoice;
 
-   if (roleChoice == 1)
-      type = "super_admin";
-   else if (roleChoice == 2)
-      type = "admin";
-   else {
+   if (roleChoice != 1 && roleChoice != 2) {
       cout << "❌ Invalid choice.\n";
       return;
    }
 
-   string sql =
-       "INSERT INTO users (username, password, attempts, locked, type, "
-       "created_at) VALUES (?, ?, 0, 0, ?, datetime('now'))";
-   sqlite3_stmt* stmt;
+   type = (roleChoice == 1 ? "super_admin" : "admin");
 
-   if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-      cout << "❌ Failed to prepare insert query.\n";
-      return;
-   }
+   int newId = users.back().id + 1;
 
-   // table columns
-   sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-   sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_TRANSIENT);
-   sqlite3_bind_text(stmt, 3, type.c_str(), -1, SQLITE_TRANSIENT);
+   // datetime now
+   time_t now = time(0);
+   char buffer[20];
+   strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&now));
+   string createdAt = buffer;
 
-   if (sqlite3_step(stmt) == SQLITE_DONE) {
-      cout << "✅ New Admin Created Successfully!\n";
-   } else {
-      cout << "❌ Error: This username already exists.\n";
-   }
+   users.push_back({newId, username, password, 0, 0, type, createdAt});
+   saveUsers(users);
 
-   sqlite3_finalize(stmt);
+   cout << "✅ Admin added successfully.\n";
 
    cout << "\nPress Enter to return to menu...";
-   cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
    cin.get();
 }
 
-void updateUser(sqlite3* db, const User& user) {
-   string sql =
-       "UPDATE users SET password=?, attempts=?, locked=?, type=? WHERE id=?";
-   sqlite3_stmt* stmt;
-
-   sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
-   sqlite3_bind_text(stmt, 1, user.password.c_str(), -1, SQLITE_STATIC);
-   sqlite3_bind_int(stmt, 2, user.attempts);
-   sqlite3_bind_int(stmt, 3, user.locked);
-   sqlite3_bind_text(stmt, 4, user.type.c_str(), -1, SQLITE_STATIC);
-   sqlite3_bind_int(stmt, 5, user.id);
-
-   sqlite3_step(stmt);
-   sqlite3_finalize(stmt);
-}
-
-void resetUserPassword(sqlite3* db) {
+void resetUserPassword(vector<User>& users) {
    string targetUser;
    cout << "Enter username to reset password: ";
    cin >> targetUser;
 
-   User x;
-   if (!getUser(db, targetUser, x)) {
-      cout << "❌ User not found.\n";
-      return;
+   for (auto& u : users) {
+      if (u.username == targetUser) {
+         cout << "Enter new password: ";
+         cin >> u.password;
+         u.attempts = 0;
+         u.locked = 0;
+         saveUsers(users);
+         cout << "✅ Password reset.\n";
+         return;
+      }
    }
-
-   cout << "Enter new password: ";
-   cin >> x.password;
-   x.attempts = 0;
-   x.locked = 0;
-
-   updateUser(db, x);
-   cout << "✅ Password reset complete.\n";
+   cout << "❌ User not found.\n";
 }
 
-void changePassword(User& currentUser, sqlite3* db) {
+void changePassword(User& currentUser, vector<User>& users) {
    string oldPass, newPass;
-
    cout << "\n=== Change Your Password ===\n";
-
-   cout << "Enter your current password: ";
+   cout << "Enter current password: ";
    cin >> oldPass;
 
    if (oldPass != currentUser.password) {
-      cout << "❌ Wrong password. Cannot change.\n";
+      cout << "❌ Wrong password.\n";
       return;
    }
 
    cout << "Enter new password: ";
    cin >> newPass;
-
    currentUser.password = newPass;
-   currentUser.attempts = 0;
-   currentUser.locked = 0;
 
-   string sql = "UPDATE users SET password=?, attempts=0, locked=0 WHERE id=?";
-   sqlite3_stmt* stmt;
-
-   sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
-   sqlite3_bind_text(stmt, 1, newPass.c_str(), -1, SQLITE_TRANSIENT);
-   sqlite3_bind_int(stmt, 2, currentUser.id);
-
-   if (sqlite3_step(stmt) == SQLITE_DONE) {
-      cout << "✅ Password updated successfully.\n";
-   } else {
-      cout << "❌ Failed to update password.\n";
-   }
-
-   sqlite3_finalize(stmt);
-
-   cout << "\nPress Enter to return to menu...";
-   cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-   cin.get();
+   updateUser(currentUser, users);
+   cout << "✅ Password updated.\n";
 }
 
-void adminMenu(User& currentUser, sqlite3* db) {
+void adminMenu(User& currentUser, vector<User>& users) {
    while (true) {
       cout << "\n--- Admin Menu ---\n";
 
@@ -259,14 +233,14 @@ void adminMenu(User& currentUser, sqlite3* db) {
       string selected = menu[index].second;
 
       if (selected == "Add Admin") {
-         addAdmin(db);
+         addAdmin(users);
       } else if (selected == "Reset User Password") {
-         resetUserPassword(db);
+         resetUserPassword(users);
       } else if (selected == "Admin Listing") {
-         getAdminsListing(db);
+         getAdminsListing(users);
       } else if (selected == "Add Book") {
          cout << "📚 Add Book function here\n";
-         addBook(db);
+         addBook();
       } else if (selected == "Add Borrower") {
          cout << "👤 Add Borrower function here\n";
       } else if (selected == "Quit") {
@@ -276,53 +250,44 @@ void adminMenu(User& currentUser, sqlite3* db) {
       } else if (selected == "Return Book") {
          cout << "📚 Return Book function here\n";
       } else if (selected == "Change Password") {
-         changePassword(currentUser, db);
+         changePassword(currentUser, users);
       }
    }
 }
 
 int main() {
    while (true) {
-      sqlite3* db;
-      sqlite3_open("database/users.db", &db);
+      vector<User> users = loadUsers();
+      User u;
 
       string inputUser, inputPass;
-      cout << "Enter Username: ";
+      cout << "\nEnter Username: ";
       cin >> inputUser;
       cout << "Enter Password: ";
       cin >> inputPass;
 
-      User u;
-      if (!getUser(db, inputUser, u)) {
-         cout << "User not found.\n";
-         sqlite3_close(db);
-         continue;  // 回到最外层 → 重新登录
+      if (!getUser(users, inputUser, u)) {
+         cout << "❌ User not found.\n";
+         continue;
       }
 
       if (u.locked) {
-         cout << "Account is locked.\n";
-         sqlite3_close(db);
+         cout << "🚫 Account locked.\n";
          continue;
       }
 
       if (u.password == inputPass) {
          u.attempts = 0;
          u.locked = 0;
-         updateUser(db, u);
+         updateUser(u, users);
 
-         cout << "Login Successful. Welcome, " << u.username << "!\n";
-         if (u.type == "super_admin" || u.type == "admin") {
-            adminMenu(u, db);
-         } else {
-            cout << "Borrower user logged in. Returning to login screen...\n";
-         }
+         cout << "✅ Login successful. Welcome, " << u.username << "!\n";
+         if (u.type == "admin" || u.type == "super_admin") adminMenu(u, users);
       } else {
-         cout << "Incorrect password.\n";
          u.attempts++;
          if (u.attempts >= 3) u.locked = 1;
-         updateUser(db, u);
+         updateUser(u, users);
+         cout << "❌ Incorrect password.\n";
       }
-
-      sqlite3_close(db);
    }
 }

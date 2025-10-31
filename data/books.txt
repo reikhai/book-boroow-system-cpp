@@ -1,0 +1,5 @@
+1|Introduction to Algorithms|Thomas H. Cormen|9780262033848|4|2025-10-31 02:43:21
+2|Clean Code|Robert C. Martin|9780132350884|5|2025-10-31 02:43:21
+3|The Pragmatic Programmer|Andrew Hunt|9780201616224|3|2025-10-31 02:43:21
+4|Design Patterns|Erich Gamma|9780201633610|2|2025-10-31 02:43:21
+5|Effective C++|Scott Meyers|9780321334879|6|2025-10-31 02:43:21

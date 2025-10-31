@@ -5,6 +5,7 @@
         "*.vue": "vue",
         "*.nvue": "vue",
         "*.json": "jsonc",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "filesystem": "cpp"
     }
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-void addBook(sqlite3* db) {
+void addBook() {
    // 在这里写logic
    cout << "\nPress Enter to return to menu...";
    cin.ignore();

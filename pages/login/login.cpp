@@ -23,7 +23,7 @@ struct User {
    string created_at;
 };
 
-const string USER_FILE = "database/users.txt";
+const string USER_FILE = "data/users.txt";
 
 vector<User> loadUsers() {
    vector<User> users;

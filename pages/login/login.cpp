@@ -9,9 +9,12 @@
 
 using namespace std;
 
-// Menu的header
 // 用来declare有这个function
-#include "../book/add_book.h"
+#include "../../struct/add_book.h"
+#include "../../struct/book.h"
+#include "../../struct/borrow_record.h"
+#include "../../struct/borrower.h"
+#include "../../struct/return_book.h"
 
 struct User {
    int id;
@@ -24,6 +27,80 @@ struct User {
 };
 
 const string USER_FILE = "data/users.txt";
+
+// global data
+vector<Borrower> borrowers;
+vector<Book> books;
+vector<BorrowRecord> borrow_records;
+
+vector<string> split(const string& line, char delimiter = '|') {
+   vector<string> parts;
+   stringstream ss(line);
+   string part;
+   while (getline(ss, part, delimiter)) parts.push_back(part);
+   return parts;
+}
+
+vector<Borrower> loadBorrowers() {
+   vector<Borrower> list;
+   ifstream file("data/borrowers.txt");
+   string line;
+
+   while (getline(file, line)) {
+      vector<string> d = split(line);
+      list.push_back({stoi(d[0]), d[1], d[2], d[3], d[4], d[5]});
+   }
+
+   return list;
+}
+
+vector<Book> loadBooks() {
+   books.clear();
+   ifstream file("data/books.txt");
+   string line;
+
+   while (getline(file, line)) {
+      vector<string> d = split(line);
+      books.push_back({
+          stoi(d[0]),  // id
+          d[1],        // title
+          d[2],        // author
+          d[3],        // isbn
+          stoi(d[4]),  // copies
+          d[5],        // created_at
+      });
+   }
+
+   return books;
+}
+
+vector<BorrowRecord> loadBorrowRecords() {
+   borrow_records.clear();
+   ifstream file("data/borrow_records.txt");
+   string line;
+
+   while (getline(file, line)) {
+      if (line.empty()) continue;
+
+      vector<string> d = split(line);
+
+      borrow_records.push_back({
+          stoi(d[0]),   // id
+          stoi(d[1]),   // borrower_id
+          stoi(d[2]),   // book_id
+          stoi(d[3]),   // quantity
+          stoi(d[4]),   // status
+          d[5],         // borrow_date
+          d[6],         // return_date
+          d[7],         // return_at
+          stoi(d[8]),   // penalty_amt
+          d[9],         // created_at
+          stoi(d[10]),  // created_by
+      });
+   }
+
+   return borrow_records;
+}
 
 vector<User> loadUsers() {
    vector<User> users;
@@ -192,7 +269,9 @@ void changePassword(User& currentUser, vector<User>& users) {
    cout << "✅ Password updated.\n";
 }
 
-void adminMenu(User& currentUser, vector<User>& users) {
+void adminMenu(User& currentUser, vector<User>& users,
+               vector<Borrower>& borrowers, vector<Book>& books,
+               vector<BorrowRecord>& borrow_records) {
    while (true) {
       cout << "\n--- Admin Menu ---\n";
 
@@ -223,7 +302,6 @@ void adminMenu(User& currentUser, vector<User>& users) {
       int choice;
       cin >> choice;
 
-      // 执行对应功能
       int index = choice - 1;
       if (index < 0 || index >= menu.size()) {
          cout << "Invalid option.\n";
@@ -239,7 +317,6 @@ void adminMenu(User& currentUser, vector<User>& users) {
       } else if (selected == "Admin Listing") {
          getAdminsListing(users);
       } else if (selected == "Add Book") {
-         cout << "📚 Add Book function here\n";
          addBook();
       } else if (selected == "Add Borrower") {
          cout << "👤 Add Borrower function here\n";
@@ -248,7 +325,7 @@ void adminMenu(User& currentUser, vector<User>& users) {
       } else if (selected == "Borrow Book") {
          cout << "📚 Borrow Book function here\n";
       } else if (selected == "Return Book") {
-         cout << "📚 Return Book function here\n";
+         returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {
          changePassword(currentUser, users);
       }
@@ -258,6 +335,9 @@ void adminMenu(User& currentUser, vector<User>& users) {
 int main() {
    while (true) {
       vector<User> users = loadUsers();
+      vector<Borrower> borrowers = loadBorrowers();
+      vector<Book> books = loadBooks();
+      vector<BorrowRecord> borrow_records = loadBorrowRecords();
       User u;
 
       string inputUser, inputPass;
@@ -282,12 +362,14 @@ int main() {
          updateUser(u, users);
 
          cout << "✅ Login successful. Welcome, " << u.username << "!\n";
-         if (u.type == "admin" || u.type == "super_admin") adminMenu(u, users);
-      } else {
-         u.attempts++;
-         if (u.attempts >= 3) u.locked = 1;
-         updateUser(u, users);
-         cout << "❌ Incorrect password.\n";
+
+         if (u.type == "admin" || u.type == "super_admin") {
+            adminMenu(u, users, borrowers, books, borrow_records);
+         } else {
+            u.attempts++;
+            if (u.attempts >= 3) u.locked = 1;
+            updateUser(u, users);
+            cout << "❌ Incorrect password.\n";
+         }
       }
    }
-}

@@ -6,7 +6,9 @@
 struct BorrowRecord
 {
    int id, borrower_id, book_id, quantity, status;
-   std::string borrow_date, return_date, return_at,created_at;
+   std::string borrow_date, return_date, return_at;
+   int penalty_amt;
+   std::string created_at;
    int created_by;
 };
 

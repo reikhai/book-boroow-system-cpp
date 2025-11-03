@@ -12,6 +12,11 @@
 #include "../../struct/borrower.h"
 using namespace std;
 
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define RESET "\033[0m"
+
 void saveBooks(vector<Book>& books) {
    ofstream file("data/books.txt");
    for (auto& b : books) {
@@ -47,7 +52,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       if (b.name == borrowerName) borrowerId = b.id;
 
    if (borrowerId == -1) {
-      cout << "❌ Borrower not found.\n";
+      cout << RED << "Borrower not found." << RESET << "\n";
       return;
    }
 
@@ -57,7 +62,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       if (bk.title == bookTitle) bookId = bk.id;
 
    if (bookId == -1) {
-      cout << "❌ Book not found.\n";
+      cout << RED << "Book not found." << RESET << "\n";
       return;
    }
 
@@ -68,7 +73,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
          record = &r;
 
    if (!record) {
-      cout << "⚠️ No active borrow record.\n";
+      cout << YELLOW << "No active borrow record." << RESET << "\n";
       return;
    }
 
@@ -97,26 +102,29 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
    int fine = 0;
    if (daysLate > 0) {
       fine = daysLate * 1;  // RM1/day
-      cout << "\n⚠️ Late return detected: " << daysLate << " days late.\n";
-      cout << "💰 Fine amount = RM " << fine << "\n";
+      cout << YELLOW << "Late return detected:" << daysLate << " days late."
+           << RESET << "\n";
+      cout << "Fine amount = RM " << fine << "\n";
 
       string payChoice;
       cout << "Pay now? (yes/no): ";
       cin >> payChoice;
 
       if (payChoice != "yes") {
-         cout << "❌ Return cancelled. Please settle payment first.\n";
+         cout << RED << "Return cancelled. Please settle payment first."
+              << RESET << "\n";
          return;
       }
 
-      cout << "✅ Payment received.\n";
+      cout << GREEN << "Payment received." << RESET << "\n";
    }
    record->penalty_amt = fine;
    record->status = 1;
    saveBooks(books);
    saveBorrowRecords(borrow_records);
 
-   cout << "✅ Book returned successfully.\n";
+   cout << GREEN << "Book returned successfully." << RESET << "\n";
+
    cout << "\nPress Enter to return...";
    cin.ignore();
    cin.get();

@@ -329,7 +329,7 @@ void adminMenu(User& currentUser, vector<User>& users,
 
          if (!isNumber) {
             cout << RED << "Please enter a number only.\n" << RESET;
-            continue; 
+            continue;
          }
 
          choice = stoi(input);
@@ -369,6 +369,17 @@ int main() {
       vector<Book> books = loadBooks();
       vector<BorrowRecord> borrow_records = loadBorrowRecords();
       User u;
+
+      const string SYSTEM_TITLE = "Book Borrowing System";
+
+      // center title
+      int leftPad = (WIDTH - SYSTEM_TITLE.size()) / 2;
+      int rightPad = WIDTH - SYSTEM_TITLE.size() - leftPad;
+
+      cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "|" << string(leftPad, ' ') << SYSTEM_TITLE
+           << string(rightPad, ' ') << "|\n";
+      cout << "+" << string(WIDTH, '-') << "+";
 
       string inputUser, inputPass;
       cout << "\nEnter Username: ";

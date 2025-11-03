@@ -17,6 +17,11 @@ using namespace std;
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
 
+const int WIDTH = 46;
+
+// ESCAPE 字符
+#define ESC "\x1B"
+
 void saveBooks(vector<Book>& books) {
    ofstream file("data/books.txt");
    for (auto& b : books) {
@@ -40,13 +45,36 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
    string borrowerName, bookTitle;
-   cout << "\n=== Return Book ===\n";
+   cout << YELLOW
+        << "\n======== Press ESC then Enter to return ======= " << RESET
+        << "\n";
+
+   string title = "Return Book";
+   int leftPad = (WIDTH - title.size()) / 2;
+   int rightPad = WIDTH - title.size() - leftPad;
+
+   cout << "+" << string(WIDTH, '-') << "+\n";
+   cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
+        << "|\n";
+   cout << "+" << string(WIDTH, '-') << "+\n";
+
    cout << "Enter borrower name: ";
    getline(cin, borrowerName);
+
+   // ESC back to menu
+   if (borrowerName == ESC) {
+      return;
+   }
+
    cout << "Enter book title: ";
+
+   // ESC back to menu
+   if (bookTitle == ESC) {
+      return;
+   }
    getline(cin, bookTitle);
 
-   // 找 borrower
+   // find borrower
    int borrowerId = -1;
    for (auto& b : borrowers)
       if (b.name == borrowerName) borrowerId = b.id;
@@ -56,7 +84,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       return;
    }
 
-   // 找 book
+   // find book
    int bookId = -1;
    for (auto& bk : books)
       if (bk.title == bookTitle) bookId = bk.id;

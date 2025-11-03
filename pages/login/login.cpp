@@ -38,6 +38,8 @@ vector<Borrower> borrowers;
 vector<Book> books;
 vector<BorrowRecord> borrow_records;
 
+const int WIDTH = 46;
+
 vector<string> split(const string& line, char delimiter = '|') {
    vector<string> parts;
    stringstream ss(line);
@@ -278,20 +280,28 @@ void changePassword(User& currentUser, vector<User>& users) {
 void adminMenu(User& currentUser, vector<User>& users,
                vector<Borrower>& borrowers, vector<Book>& books,
                vector<BorrowRecord>& borrow_records) {
+   // handle admin menu
    while (true) {
-      cout << "\n--- Admin Menu ---\n";
+      system("clear");
+
+      string title = "ADMIN MENU";
+      int leftPad = (WIDTH - title.size()) / 2;
+      int rightPad = WIDTH - title.size() - leftPad;
+
+      cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
+           << "|\n";
+      cout << "+" << string(WIDTH, '-') << "+\n";
 
       vector<pair<int, string>> menu;
       int optionNumber = 1;
 
-      // super_admin 专用
       if (currentUser.type == "super_admin") {
          menu.push_back({optionNumber++, "Add Admin"});
          menu.push_back({optionNumber++, "Reset User Password"});
          menu.push_back({optionNumber++, "Admin Listing"});
       }
 
-      // admin && super_admin 共享
       menu.push_back({optionNumber++, "Add Book"});
       menu.push_back({optionNumber++, "Add Borrower"});
       menu.push_back({optionNumber++, "Borrow Book"});
@@ -299,22 +309,36 @@ void adminMenu(User& currentUser, vector<User>& users,
       menu.push_back({optionNumber++, "Change Password"});
       menu.push_back({optionNumber++, "Quit"});
 
-      // show menu
       for (auto& m : menu) {
-         cout << m.first << ". " << m.second << endl;
+         string line = to_string(m.first) + ". " + m.second;
+         cout << "| " << left << setw(WIDTH - 2) << line << " |\n";
       }
 
-      cout << "Choose: ";
+      cout << "+" << string(WIDTH, '-') << "+\n\n";
+
+      // only handle input checking
       int choice;
-      cin >> choice;
+      while (true) {
+         cout << "Choose: ";
+         string input;
+         cin >> input;
 
-      int index = choice - 1;
-      if (index < 0 || index >= menu.size()) {
-         cout << RED << "Invalid option" << RESET << "\n";
-         continue;
+         bool isNumber = true;
+         for (char c : input)
+            if (!isdigit(c)) isNumber = false;
+
+         if (!isNumber) {
+            cout << RED << "Please enter a number only.\n" << RESET;
+            continue; 
+         }
+
+         choice = stoi(input);
+         if (choice >= 1 && choice <= menu.size()) break;
+
+         cout << RED << "Invalid option. Try again.\n" << RESET;
       }
 
-      string selected = menu[index].second;
+      string selected = menu[choice - 1].second;
 
       if (selected == "Add Admin") {
          addAdmin(users);
@@ -326,14 +350,14 @@ void adminMenu(User& currentUser, vector<User>& users,
          addBook();
       } else if (selected == "Add Borrower") {
          cout << "👤 Add Borrower function here\n";
-      } else if (selected == "Quit") {
-         return;
       } else if (selected == "Borrow Book") {
          cout << "📚 Borrow Book function here\n";
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {
          changePassword(currentUser, users);
+      } else if (selected == "Quit") {
+         return;
       }
    }
 }

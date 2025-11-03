@@ -215,7 +215,7 @@ void addAdmin(vector<User>& users) {
    cin >> roleChoice;
 
    if (roleChoice != 1 && roleChoice != 2) {
-      cout << RED << "Invalid choice." << RESET << "\n";
+      cout << RED << "Invalid choice.." << RESET << "\n";
       return;
    }
 

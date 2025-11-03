@@ -16,6 +16,11 @@ using namespace std;
 #include "../../struct/borrower.h"
 #include "../../struct/return_book.h"
 
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define RESET "\033[0m"
+
 struct User {
    int id;
    string username;
@@ -195,7 +200,8 @@ void addAdmin(vector<User>& users) {
    // check duplicate username
    for (auto& u : users) {
       if (u.username == username) {
-         cout << "❌ Error: Username already exists. Try another.\n";
+         cout << RED << "Error: Username already exists. Try another." << RESET
+              << "\n";
          return;
       }
    }
@@ -207,7 +213,7 @@ void addAdmin(vector<User>& users) {
    cin >> roleChoice;
 
    if (roleChoice != 1 && roleChoice != 2) {
-      cout << "❌ Invalid choice.\n";
+      cout << RED << "Invalid choice." << RESET << "\n";
       return;
    }
 
@@ -224,7 +230,7 @@ void addAdmin(vector<User>& users) {
    users.push_back({newId, username, password, 0, 0, type, createdAt});
    saveUsers(users);
 
-   cout << "✅ Admin added successfully.\n";
+   cout << GREEN << "Admin added successfully." << RESET << "\n";
 
    cout << "\nPress Enter to return to menu...";
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -243,11 +249,11 @@ void resetUserPassword(vector<User>& users) {
          u.attempts = 0;
          u.locked = 0;
          saveUsers(users);
-         cout << "✅ Password reset.\n";
+         cout << GREEN << "Password reset." << RESET << "\n";
          return;
       }
    }
-   cout << "❌ User not found.\n";
+   cout << RED << "User not found." << RESET << "\n";
 }
 
 void changePassword(User& currentUser, vector<User>& users) {
@@ -257,7 +263,7 @@ void changePassword(User& currentUser, vector<User>& users) {
    cin >> oldPass;
 
    if (oldPass != currentUser.password) {
-      cout << "❌ Wrong password.\n";
+      cout << RED << "Wrong password." << RESET << "\n";
       return;
    }
 
@@ -266,7 +272,7 @@ void changePassword(User& currentUser, vector<User>& users) {
    currentUser.password = newPass;
 
    updateUser(currentUser, users);
-   cout << "✅ Password updated.\n";
+   cout << GREEN << "Password updated." << RESET << "\n";
 }
 
 void adminMenu(User& currentUser, vector<User>& users,
@@ -304,7 +310,7 @@ void adminMenu(User& currentUser, vector<User>& users,
 
       int index = choice - 1;
       if (index < 0 || index >= menu.size()) {
-         cout << "Invalid option.\n";
+         cout << RED << "Invalid option" << RESET << "\n";
          continue;
       }
 
@@ -347,12 +353,13 @@ int main() {
       cin >> inputPass;
 
       if (!getUser(users, inputUser, u)) {
-         cout << "❌ User not found.\n";
+         cout << RED << "User not found." << RESET << "\n";
+
          continue;
       }
 
       if (u.locked) {
-         cout << "🚫 Account locked.\n";
+         cout << RED << "Account locked." << RESET << "\n";
          continue;
       }
 
@@ -361,16 +368,17 @@ int main() {
          u.locked = 0;
          updateUser(u, users);
 
-         cout << "✅ Login successful. Welcome, " << u.username << "!\n";
+         cout << GREEN << "Login Successful, Welcome " << u.username << "!"
+              << RESET << "\n";
 
          if (u.type == "admin" || u.type == "super_admin") {
             adminMenu(u, users, borrowers, books, borrow_records);
-         } else {
-            u.attempts++;
-            if (u.attempts >= 3) u.locked = 1;
-            updateUser(u, users);
-            cout << "❌ Incorrect password.\n";
          }
+      } else {
+         u.attempts++;
+         if (u.attempts >= 3) u.locked = 1;
+         updateUser(u, users);
+         cout << RED << "Incorrect password." << RESET << "\n";
       }
    }
 }

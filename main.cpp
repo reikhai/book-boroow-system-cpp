@@ -42,6 +42,14 @@ struct BorrowRecord {
    int created_by;
 };
 
+void clearScreen() {
+#ifdef _WIN32
+   system("cls");
+#else
+   system("clear");
+#endif
+}
+
 struct Borrower {
    int id;
    std::string name;
@@ -109,7 +117,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       if (bookTitle == ESC) return;
 
       // ------------------ Split into array ------------------
-      string titles[20]; // max 20 books in 1 transaction
+      string titles[20];  // max 20 books in 1 transaction
       int titleCount = 0;
       string temp = "";
 
@@ -610,7 +618,7 @@ void adminMenu(User& currentUser, vector<User>& users,
                vector<BorrowRecord>& borrow_records) {
    // handle admin menu
    while (true) {
-      system("clear");
+      clearScreen();
 
       string title = "ADMIN MENU";
       int leftPad = (WIDTH - title.size()) / 2;

@@ -659,7 +659,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Book") {
          addBook();
       } else if (selected == "Add Borrower") {
-         cout << "👤 Add Borrower function here\n";
+         addBorrower();
       } else if (selected == "Borrow Book") {
          cout << "📚 Borrow Book function here\n";
       } else if (selected == "Return Book") {

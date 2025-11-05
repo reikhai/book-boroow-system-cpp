@@ -43,10 +43,10 @@ struct BorrowRecord {
 };
 
 void clearScreen() {
-#ifdef _WIN32
-   system("cls");
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
+   system("cls"); //Windows
 #else
-   system("clear");
+   system("clear"); //macOS
 #endif
 }
 

@@ -274,7 +274,7 @@ void addBook() {
 // === Annie ===
 
 // === Save (update) all borrower ===
-void updateBorrower(vector<Borrower>& borrowers) {
+void updateBorrowers(vector<Borrower>& borrowers) {
    ofstream file("data/borrowers.txt");
    for (auto& b : borrowers){
       file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact << '|' << b.created_at << "\n";
@@ -283,35 +283,45 @@ void updateBorrower(vector<Borrower>& borrowers) {
 
 // === Add new borrower ===
 void addBorrower(vector<Borrower>& borrowers){
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+   while (true) {
       string title ="Add New Borrower";
       int leftPad = (WIDTH - title.size()) / 2;
       int rightPad = WIDTH - title.size() - leftPad;
-
+      
       cout << YELLOW << "\n======= Add Borrower =======\n" << RESET;
       cout << "+" << string(WIDTH, '-') << "+\n";
       cout << "|" << string(leftPad, ' ') << title << string(rightPad,' ') << "|\n";
       cout << "+" << string(WIDTH,'-') << "+\n";
-
+      
       Borrower b;
       b.id = borrowers.empty() ? 1 : borrowers.back().id + 1;
-
+      
       cout << "Enter borrower name    : ";
       getline(cin, b.name);
       cout << "Enter borrower address : ";
       getline(cin, b.address);
       cout << "Enter contact number   : ";
       getline(cin, b.contact);
-
+      
       // time/date
-      b.created_at = "2025-10-30";  // (Example date, replace with system time later)
+      time_t now = time(0);
+      b.created_at = ctime(&now);
+      b.created_at.pop_back();
       
       borrowers.push_back(b);
-      updateBorrower(borrowers);
+      updateBorrowers(borrowers);
       
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
+
+      char choice;
+      cout << "\nAdd another borrower?(Y/N): ";
+      cin >> choice;
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      if (toupper(choice) !='Y') break;
    }
+}
 
 // === Display all borrowers ===
 void displayBorrowers(vector<Borrower>& borrowers) {
@@ -659,7 +669,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Book") {
          addBook();
       } else if (selected == "Add Borrower") {
-         addBorrower();
+         addBorrower(borrowers);
       } else if (selected == "Borrow Book") {
          cout << "📚 Borrow Book function here\n";
       } else if (selected == "Return Book") {

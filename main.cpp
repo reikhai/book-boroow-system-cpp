@@ -273,16 +273,16 @@ void addBook() {
 
 // === Annie ===
 
-   // === Save (update) all borrower ===
-   void updateBorrower(vector<Borrower>& borrowers) {
-      ofstream file("data/borrowers.txt");
-      for (auto& b : borrowers){
-         file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact << '|' << b.created_at << "\n";
-      }
+// === Save (update) all borrower ===
+void updateBorrower(vector<Borrower>& borrowers) {
+   ofstream file("data/borrowers.txt");
+   for (auto& b : borrowers){
+      file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact << '|' << b.created_at << "\n";
    }
+}
 
-   // === Add new borrower ===
-   void addBorrower(vector<Borrower>& borrowers){
+// === Add new borrower ===
+void addBorrower(vector<Borrower>& borrowers){
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
       string title ="Add New Borrower";
@@ -313,8 +313,8 @@ void addBook() {
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
    }
 
-   // === Display all borrowers ===
-   void displayBorrowers(vector<Borrower>& borrowers) {
+// === Display all borrowers ===
+void displayBorrowers(vector<Borrower>& borrowers) {
       cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
       
       if (borrowers.empty()) {

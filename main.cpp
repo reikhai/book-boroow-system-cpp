@@ -1,9 +1,9 @@
 #include <ctime>
 #include <filesystem>
-#include <fstream>
-#include <iomanip>
+#include <fstream> // For file operations
+#include <iomanip> // for setw()
 #include <iostream>
-#include <sstream>
+#include <sstream> // For splitting text lines
 #include <string>
 #include <vector>
 
@@ -209,12 +209,97 @@ void addBook() {
 // === End ===
 
 // === Annie ===
-void addBorrower() {
-   // 在这里写logic
+void loadBorrowers(vector<Borrower>& borrowers);
+void updateBorrower(vector<Borrower>& borrowers);
+void addBorrower(vector<Borrower>& borrowers);
+void displayBorrowers(vector<Borrower>& borrowers); 
+
+// load existing borrower data from file ===
+void loadBorrowers(vector<Borrower>& borrowers){
+   ifstream file("data/borrowers.txt");
+   string line;
+   borrowers.clear();
+
+   while (getline(file, line)) {
+      stringstream ss(line);
+      Borrower b;
+      string id_str;
+      getline(ss, id_str, '|');
+      getline(ss, b.name, '|');
+      getline(ss, b.address, '|');
+      getline(ss, b.contact, '|');
+      getline(ss, b.created_at, '|');
+
+      if (!id_str.empty()) b.id = stoi(id_str);
+      borrowers.push_back(b);
+      }
+      
+   }
+
+   // === Save (update) all borrower data into file ===
+   void updateBorrower(vector<Borrower>& borrowers) {
+      ofstream file("data/borrowers.txt");
+      for (auto& b : borrowers){
+         file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact << '|' << b.created_at << "\n";
+      }
+   }
+
+   // === Add new borrower ===
+   void addBorrower(vector<Borrower>& borrowers){
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+      string title ="Add New Borrower";
+      int leftPad = (WIDTH - title.size()) / 2;
+      int rightPad = WIDTH - title.size() - leftPad;
+
+      cout << YELLOW << "\n======= Add Borrower =======\n" << RESET;
+      cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "|" << string(leftPad, ' ') << title << string(rightPad,' ') << "|\n";
+      cout << "+" << string(WIDTH,'-') << "+\n";
+
+      Borrower b;
+      b.id = borrowers.empty() ? 1 : borrowers.back().id + 1;
+
+      cout << "Enter borrower name    : ";
+      getline(cin, b.name);
+      cout << "Enter borrower address : ";
+      getline(cin, b.address);
+      cout << "Enter contact number   : ";
+      getline(cin, b.contact);
+
+      // time/date
+      b.created_at = "2025-10-30";  // (Example date, replace with system time later)
+      
+      borrowers.push_back(b);
+      updateBorrower(borrowers);
+      
+      cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
+   }
+
+   // === Display all borrowers ===
+   void displayBorrowers(vector<Borrower>& borrowers) {
+      cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
+      
+      if (borrowers.empty()) {
+         cout << RED << "No borrower records found.\n" << RESET;
+         return;
+      }
+      
+      cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15) << "Contact" << "Address\n";
+      cout << string(60, '-') << "\n";
+      
+      for (auto& b : borrowers) {
+         cout << left << setw(5) << b.id 
+              << setw(20) << b.name 
+              << setw(15) << b.contact 
+              << b.address << "\n";
+    }
+
    cout << "\nPress Enter to return to menu...";
    cout << "\nChange by adrian" << endl;
    cin.ignore();
    cin.get();  // Wait for user input before returning
+   
 }
 // === End ===
 

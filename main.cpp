@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// ESCAPE 字符 
+// ESCAPE 字符
 #define ESC "\x1B"
 
 #define RED "\033[31m"
@@ -36,7 +36,7 @@ struct Book {
 
 struct BorrowRecord {
    int id, borrower_id, book_id, quantity, status;
-   std::string borrow_date, return_date, return_at;
+   std::string borrow_date, due_date, return_date;
    int penalty_amt;
    std::string created_at;
    int created_by;
@@ -74,7 +74,7 @@ void updateBorrowRecords(vector<BorrowRecord>& borrow_records) {
    for (auto& r : borrow_records) {
       file << r.id << "|" << r.borrower_id << "|" << r.book_id << "|"
            << r.quantity << "|" << r.status << "|" << r.borrow_date << "|"
-           << r.return_date << "|" << r.return_at << "|" << r.penalty_amt << "|"
+           << r.due_date << "|" << r.return_date << "|" << r.penalty_amt << "|"
            << r.created_at << "|" << r.created_by << "\n";
    }
 }
@@ -83,119 +83,174 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
                 vector<BorrowRecord>& borrow_records) {
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-   string borrowerName, bookTitle;
-   cout << YELLOW
-        << "\n======== Press ESC then Enter to return ======= " << RESET
-        << "\n";
+   while (true) {
+      string borrowerName, bookTitle;
+      cout << YELLOW
+           << "\n======== Press ESC then Enter to return ======= " << RESET
+           << "\n";
 
-   string title = "Return Book";
-   int leftPad = (WIDTH - title.size()) / 2;
-   int rightPad = WIDTH - title.size() - leftPad;
+      string title = "Return Book";
+      int leftPad = (WIDTH - title.size()) / 2;
+      int rightPad = WIDTH - title.size() - leftPad;
 
-   cout << "+" << string(WIDTH, '-') << "+\n";
-   cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
-        << "|\n";
-   cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
+           << "|\n";
+      cout << "+" << string(WIDTH, '-') << "+\n";
 
-   cout << "Enter borrower name: ";
-   getline(cin, borrowerName);
+      cout << "Enter borrower name: ";
+      getline(cin, borrowerName);
 
-   // ESC back to menu
-   if (borrowerName == ESC) {
-      return;
-   }
+      if (borrowerName == ESC) return;
 
-   cout << "Enter book title: ";
+      cout << "Enter book title (multiple allowed, split by comma): ";
+      getline(cin, bookTitle);
 
-   // ESC back to menu
-   if (bookTitle == ESC) {
-      return;
-   }
-   getline(cin, bookTitle);
+      if (bookTitle == ESC) return;
 
-   // find borrower
-   int borrowerId = -1;
-   for (auto& b : borrowers)
-      if (b.name == borrowerName) borrowerId = b.id;
+      // ------------------ Split into array ------------------
+      string titles[20]; // max 20 books in 1 transaction
+      int titleCount = 0;
+      string temp = "";
 
-   if (borrowerId == -1) {
-      cout << RED << "Borrower not found." << RESET << "\n";
-      return;
-   }
+      for (char c : bookTitle) {
+         if (c == ',') {
+            // trim
+            temp.erase(0, temp.find_first_not_of(" \t"));
+            temp.erase(temp.find_last_not_of(" \t") + 1);
+            if (!temp.empty() && titleCount < 20) titles[titleCount++] = temp;
+            temp = "";
+         } else {
+            temp += c;
+         }
+      }
+      temp.erase(0, temp.find_first_not_of(" \t"));
+      temp.erase(temp.find_last_not_of(" \t") + 1);
+      if (!temp.empty() && titleCount < 20) titles[titleCount++] = temp;
 
-   // find book
-   int bookId = -1;
-   for (auto& bk : books)
-      if (bk.title == bookTitle) bookId = bk.id;
-
-   if (bookId == -1) {
-      cout << RED << "Book not found." << RESET << "\n";
-      return;
-   }
-
-   // 找未归还记录 (status == 0)
-   BorrowRecord* record = nullptr;
-   for (auto& r : borrow_records)
-      if (r.borrower_id == borrowerId && r.book_id == bookId && r.status == 0)
-         record = &r;
-
-   if (!record) {
-      cout << YELLOW << "No active borrow record." << RESET << "\n";
-      return;
-   }
-
-   for (auto& bk : books)
-      if (bk.id == bookId) bk.copies += record->quantity;
-
-   time_t now = time(0);
-   char buf[20];
-   strftime(buf, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-   record->return_at = buf;
-
-   // 转换字符串日期为 tm 结构
-   tm borrow_tm = {}, return_tm = {};
-   stringstream ss1(record->borrow_date);
-   stringstream ss2(record->return_date);
-
-   ss1 >> get_time(&borrow_tm, "%Y-%m-%d");
-   ss2 >> get_time(&return_tm, "%Y-%m-%d");
-
-   // convert to time_t
-   time_t borrow_time = mktime(&borrow_tm);
-   time_t return_time = mktime(&return_tm);
-
-   // count days
-   int daysLate = difftime(return_time, borrow_time) / (60 * 60 * 24);
-   int fine = 0;
-   if (daysLate > 0) {
-      fine = daysLate * 1;  // RM1/day
-      cout << YELLOW << "Late return detected:" << daysLate << " days late."
-           << RESET << "\n";
-      cout << "Fine amount = RM " << fine << "\n";
-
-      string payChoice;
-      cout << "Pay now? (yes/no): ";
-      cin >> payChoice;
-
-      if (payChoice != "yes") {
-         cout << RED << "Return cancelled. Please settle payment first."
-              << RESET << "\n";
-         return;
+      if (titleCount == 0) {
+         cout << RED << "No valid book title entered." << RESET << "\n";
+         continue;  // repeat
       }
 
-      cout << GREEN << "Payment received." << RESET << "\n";
+      // find borrower
+      int borrowerId = -1;
+      for (auto& b : borrowers)
+         if (b.name == borrowerName) borrowerId = b.id;
+
+      if (borrowerId == -1) {
+         cout << RED << "Borrower not found." << RESET << "\n";
+         continue;  // repeat
+      }
+
+      bool anyReturned = false;
+
+      // ------ Fine summary ------
+      int totalFine = 0;
+      string lateDetails[20];
+      int lateCount = 0;
+
+      // ---------------- Return loop ----------------
+      for (int i = 0; i < titleCount; i++) {
+         string titleOne = titles[i];
+
+         int bookId = -1;
+         for (auto& bk : books)
+            if (bk.title == titleOne) bookId = bk.id;
+
+         if (bookId == -1) {
+            cout << RED << "Book \"" << titleOne << "\" not found." << RESET
+                 << "\n";
+            continue;
+         }
+
+         BorrowRecord* record = nullptr;
+         for (auto& r : borrow_records)
+            if (r.borrower_id == borrowerId && r.book_id == bookId &&
+                r.status == 0)
+               record = &r;
+
+         if (!record) {
+            cout << YELLOW << "No active borrow record for \"" << titleOne
+                 << "\"." << RESET << "\n";
+            continue;
+         }
+
+         // Add copies back
+         for (auto& bk : books)
+            if (bk.id == bookId) bk.copies += record->quantity;
+
+         // Time set
+         time_t now = time(0);
+         char buf[20];
+         strftime(buf, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+         record->return_date = buf;
+
+         // compute late days
+         tm due_tm = {};
+         stringstream ssDue(record->due_date);
+         ssDue >> get_time(&due_tm, "%Y-%m-%d");
+
+         time_t due_time = mktime(&due_tm);
+         time_t now_time = time(0);  // current time
+
+         int daysLate = difftime(now_time, due_time) / (60 * 60 * 24);
+         int fine = 0;
+
+         if (daysLate > 0) {
+            fine = daysLate * 1;
+            totalFine += fine;
+
+            if (lateCount < 20)
+               lateDetails[lateCount++] =
+                   "- " + titleOne + " : " + to_string(daysLate) +
+                   " days late (RM " + to_string(fine) + ")";
+         }
+
+         record->penalty_amt = fine;
+         record->status = 1;
+         anyReturned = true;
+
+         cout << GREEN << "Returned: " << titleOne << RESET << "\n";
+      }
+
+      // ---------------- Late Summary + Pay ----------------
+      if (lateCount > 0) {
+         cout << YELLOW << "\nLate Return Summary:\n" << RESET;
+         for (int i = 0; i < lateCount; i++) cout << lateDetails[i] << "\n";
+
+         cout << "\nTotal Fine = RM " << totalFine << "\n\n";
+
+         string payChoice;
+         cout << "Pay now? (yes/no): ";
+         cin >> payChoice;
+
+         if (payChoice != "yes") {
+            cout << RED << "Return cancelled. Please settle payment first."
+                 << RESET << "\n";
+            return;
+         }
+
+         cout << GREEN << "Payment received." << RESET << "\n";
+      }
+
+      if (!anyReturned) {
+         cout << YELLOW << "\nNo books were returned.\n" << RESET;
+         continue;  // repeat
+      }
+
+      updateBooks(books);
+      updateBorrowRecords(borrow_records);
+      cout << GREEN
+           << "\nAll return processes completed. No overdue records found. \n"
+           << RESET;
+
+      cin.ignore();
+      cin.get();
+      break;
    }
-   record->penalty_amt = fine;
-   record->status = 1;
-   updateBooks(books);
-   updateBorrowRecords(borrow_records);
-
-   cout << GREEN << "Book returned successfully." << RESET << "\n";
-
-   cout << "\nPress Enter to return...";
-   cin.ignore();
-   cin.get();
 }
+
 // === End ===
 
 // === Adrian ===
@@ -286,8 +341,8 @@ vector<BorrowRecord> loadBorrowRecords() {
           stoi(d[3]),   // quantity
           stoi(d[4]),   // status
           d[5],         // borrow_date
-          d[6],         // return_date
-          d[7],         // return_at
+          d[6],         // due_date
+          d[7],         // return_date
           stoi(d[8]),   // penalty_amt
           d[9],         // created_at
           stoi(d[10]),  // created_by

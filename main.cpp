@@ -300,15 +300,17 @@ void addBorrower(vector<Borrower>& borrowers){
       
       cout << "Enter borrower name    : ";
       getline(cin, b.name);
-      cout << "Enter borrower address : ";
-      getline(cin, b.address);
       cout << "Enter contact number   : ";
       getline(cin, b.contact);
+      cout << "Enter borrower address : ";
+      getline(cin, b.address);
       
       // time/date
       time_t now = time(0);
-      b.created_at = ctime(&now);
-      b.created_at.pop_back();
+      tm *ltm = localtime(&now);
+      char buffer[20];
+      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+      b.created_at = buffer;
       
       borrowers.push_back(b);
       updateBorrowers(borrowers);

@@ -272,34 +272,8 @@ void addBook() {
 // === End ===
 
 // === Annie ===
-void loadBorrowers(vector<Borrower>& borrowers);
-void updateBorrower(vector<Borrower>& borrowers);
-void addBorrower(vector<Borrower>& borrowers);
-void displayBorrowers(vector<Borrower>& borrowers); 
 
-// load existing borrower data from file ===
-void loadBorrowers(vector<Borrower>& borrowers){
-   ifstream file("data/borrowers.txt");
-   string line;
-   borrowers.clear();
-
-   while (getline(file, line)) {
-      stringstream ss(line);
-      Borrower b;
-      string id_str;
-      getline(ss, id_str, '|');
-      getline(ss, b.name, '|');
-      getline(ss, b.address, '|');
-      getline(ss, b.contact, '|');
-      getline(ss, b.created_at, '|');
-
-      if (!id_str.empty()) b.id = stoi(id_str);
-      borrowers.push_back(b);
-      }
-      
-   }
-
-   // === Save (update) all borrower data into file ===
+   // === Save (update) all borrower ===
    void updateBorrower(vector<Borrower>& borrowers) {
       ofstream file("data/borrowers.txt");
       for (auto& b : borrowers){

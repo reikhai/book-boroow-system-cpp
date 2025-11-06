@@ -411,12 +411,133 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 
 // === JY ===
 void addBorrowRecord() {
+  //example function
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    while (true) {
+        string borrowerName, bookTitle;
+        cout << YELLOW << "\n======== Press ESC then Enter to return ======= " << RESET << "\n";
+
+        string title = "Borrow Book";
+        int leftPad = (WIDTH - title.size()) / 2;
+        int rightPad = WIDTH - title.size() - leftPad;
+
+        cout << "+" << string(WIDTH, '-') << "+\n";
+        cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ') << "|\n";
+        cout << "+" << string(WIDTH, '-') << "+\n";
+
+        cout << "Enter borrower name: ";
+        getline(cin, borrowerName);
+
+        if (borrowerName == ESC) return;
+
+        cout << "Enter book title: ";
+        getline(cin, bookTitle);
+
+        if (bookTitle == ESC) return;
+
+        // Find borrower
+        int borrowerId = -1;
+        for (auto& b : borrowers) {
+            if (b.name == borrowerName) {
+                borrowerId = b.id;
+                break;
+            }
+        }
+
+        if (borrowerId == -1) {
+            cout << RED << "Borrower not found." << RESET << "\n";
+            continue;
+        }
+
+        // Find book
+        Book* book = nullptr;
+        for (auto& b : books) {
+            if (b.title == bookTitle) {
+                book = &b;
+                break;
+            }
+        }
+
+        if (!book) {
+            cout << RED << "Book not found." << RESET << "\n";
+            continue;
+        }
+
+        // Check if book is available
+        if (book->copies <= 0) {
+            cout << RED << "Sorry, no copies available for this book." << RESET << "\n";
+            continue;
+        }
+
+        // Get quantity to borrow
+        int quantity;
+        cout << "Enter quantity to borrow (max " << book->copies << "): ";
+        cin >> quantity;
+
+        if (quantity <= 0 || quantity > book->copies) {
+            cout << RED << "Invalid quantity." << RESET << "\n";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        // Create borrow record
+        BorrowRecord newRecord;
+        newRecord.id = borrow_records.empty() ? 1 : borrow_records.back().id + 1;
+        newRecord.borrower_id = borrowerId;
+        newRecord.book_id = book->id;
+        newRecord.quantity = quantity;
+        newRecord.status = 0; // 0 = active, 1 = returned
+        
+        // Set dates
+        time_t now = time(0);
+        tm* ltm = localtime(&now);
+        char buffer[20];
+        
+        // Borrow date (now)
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+        newRecord.borrow_date = buffer;
+        
+        // Due date (now + 21 days)
+        ltm->tm_mday += 21;
+        mktime(ltm);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+        newRecord.due_date = buffer;
+        
+        newRecord.return_date = "NULL";
+        newRecord.penalty_amt = 0;
+        
+        // Created at
+        ltm = localtime(&now);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+        newRecord.created_at = buffer;
+        newRecord.created_by = 1; // Current user ID should be used here
+
+        // Update book copies
+        book->copies -= quantity;
+
+        // Save changes
+        borrow_records.push_back(newRecord);
+        updateBorrowRecords(borrow_records);
+        updateBooks(books);
+
+        cout << GREEN << "\nBook borrowed successfully!" << RESET << "\n";
+        cout << "Due date: " << newRecord.due_date << "\n";
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "\nPress Enter to continue...";
+        cin.get();
+        break;
+    }
+  
+  
    // 在这里写logic
-   //hi there
+   /*hi there
    cout << "\nPress Enter to return to menu...";
    cout << "\nChange by adrian" << endl;
    cin.ignore();
    cin.get();  // Wait for user input before returning
+*/
 }
 // === End ===
 
@@ -732,7 +853,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Borrower") {
          addBorrower(borrowers);
       } else if (selected == "Borrow Book") {
-         cout << "📚 Borrow Book function here\n";
+         addBorrowRecord(); 
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {

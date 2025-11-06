@@ -412,6 +412,7 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 // === JY ===
 void addBorrowRecord() {
    // 在这里写logic
+   //hi there
    cout << "\nPress Enter to return to menu...";
    cout << "\nChange by adrian" << endl;
    cin.ignore();

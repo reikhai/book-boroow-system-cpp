@@ -1,9 +1,9 @@
 #include <ctime>
 #include <filesystem>
-#include <fstream> // For file operations
-#include <iomanip> // for setw()
+#include <fstream>  // For file operations
+#include <iomanip>  // for setw()
 #include <iostream>
-#include <sstream> // For splitting text lines
+#include <sstream>  // For splitting text lines
 #include <string>
 #include <vector>
 
@@ -42,14 +42,6 @@ struct BorrowRecord {
    int created_by;
 };
 
-void clearScreen() {
-#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
-   system("cls"); //Windows
-#else
-   system("clear"); //macOS
-#endif
-}
-
 struct Borrower {
    int id;
    std::string name;
@@ -67,6 +59,14 @@ vector<Book> books;
 vector<BorrowRecord> borrow_records;
 
 const int WIDTH = 46;
+
+void clearScreen() {
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
+   system("cls");  // Windows
+#else
+   system("clear");  // macOS
+#endif
+}
 
 // === Rei Khai ===
 void updateBooks(vector<Book>& books) {
@@ -276,79 +276,79 @@ void addBook() {
 // === Save (update) all borrower ===
 void updateBorrowers(vector<Borrower>& borrowers) {
    ofstream file("data/borrowers.txt");
-   for (auto& b : borrowers){
-      file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact << '|' << b.created_at << "\n";
+   for (auto& b : borrowers) {
+      file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact
+           << '|' << b.created_at << "\n";
    }
 }
 
 // === Add new borrower ===
-void addBorrower(vector<Borrower>& borrowers){
+void addBorrower(vector<Borrower>& borrowers) {
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
    while (true) {
-      string title ="Add New Borrower";
+      string title = "Add New Borrower";
       int leftPad = (WIDTH - title.size()) / 2;
       int rightPad = WIDTH - title.size() - leftPad;
-      
+
       cout << YELLOW << "\n======= Add Borrower =======\n" << RESET;
       cout << "+" << string(WIDTH, '-') << "+\n";
-      cout << "|" << string(leftPad, ' ') << title << string(rightPad,' ') << "|\n";
-      cout << "+" << string(WIDTH,'-') << "+\n";
-      
+      cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
+           << "|\n";
+      cout << "+" << string(WIDTH, '-') << "+\n";
+
       Borrower b;
       b.id = borrowers.empty() ? 1 : borrowers.back().id + 1;
-      
+
       cout << "Enter borrower name    : ";
       getline(cin, b.name);
       cout << "Enter contact number   : ";
       getline(cin, b.contact);
       cout << "Enter borrower address : ";
       getline(cin, b.address);
-      
+
       // time/date
       time_t now = time(0);
-      tm *ltm = localtime(&now);
+      tm* ltm = localtime(&now);
       char buffer[20];
       strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
       b.created_at = buffer;
-      
+
       borrowers.push_back(b);
       updateBorrowers(borrowers);
-      
+
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
 
       char choice;
       cout << "\nAdd another borrower?(Y/N): ";
       cin >> choice;
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
-      if (toupper(choice) !='Y') break;
+      if (toupper(choice) != 'Y') break;
    }
 }
 
 // === Display all borrowers ===
 void displayBorrowers(vector<Borrower>& borrowers) {
-      cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
-      
-      if (borrowers.empty()) {
-         cout << RED << "No borrower records found.\n" << RESET;
-         return;
-      }
-      
-      cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15) << "Contact" << "Address\n";
-      cout << string(60, '-') << "\n";
-      
-      for (auto& b : borrowers) {
-         cout << left << setw(5) << b.id 
-              << setw(20) << b.name 
-              << setw(15) << b.contact 
-              << b.address << "\n";
-    }
+   cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
+
+   if (borrowers.empty()) {
+      cout << RED << "No borrower records found.\n" << RESET;
+      return;
+   }
+
+   cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15)
+        << "Contact" << "Address\n";
+   cout << string(60, '-') << "\n";
+
+   for (auto& b : borrowers) {
+      cout << left << setw(5) << b.id << setw(20) << b.name << setw(15)
+           << b.contact << b.address << "\n";
+   }
 
    cout << "\nPress Enter to return to menu...";
    cout << "\nChange by adrian" << endl;
    cin.ignore();
    cin.get();  // Wait for user input before returning
-   
 }
 // === End ===
 

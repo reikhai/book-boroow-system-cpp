@@ -852,8 +852,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Borrower") {
          addBorrower(borrowers);
       } else if (selected == "Borrow Book") {
-         addBorrowRecord();
-         // cout << "📚 Borrow Book function here\n";
+         addBorrowRecord(); 
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {

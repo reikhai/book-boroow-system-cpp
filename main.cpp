@@ -346,7 +346,6 @@ void displayBorrowers(vector<Borrower>& borrowers) {
    }
 
    cout << "\nPress Enter to return to menu...";
-   cout << "\nChange by adrian" << endl;
    cin.ignore();
    cin.get();  // Wait for user input before returning
 }

@@ -686,6 +686,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       menu.push_back({optionNumber++, "Add Borrower"});
       menu.push_back({optionNumber++, "Borrow Book"});
       menu.push_back({optionNumber++, "Return Book"});
+      menu.push_back({optionNumber++, "Borrower List"});
       menu.push_back({optionNumber++, "Change Password"});
       menu.push_back({optionNumber++, "Quit"});
 
@@ -738,6 +739,8 @@ void adminMenu(User& currentUser, vector<User>& users,
          changePassword(currentUser, users);
       } else if (selected == "Quit") {
          return;
+      } else if (selected == "Borrower List"){
+         displayBorrowers(borrowers);
       }
    }
 }

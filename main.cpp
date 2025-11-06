@@ -807,7 +807,6 @@ void adminMenu(User& currentUser, vector<User>& users,
       menu.push_back({optionNumber++, "Add Borrower"});
       menu.push_back({optionNumber++, "Borrow Book"});
       menu.push_back({optionNumber++, "Return Book"});
-      menu.push_back({optionNumber++, "Borrower Name List"});
       menu.push_back({optionNumber++, "Change Password"});
       menu.push_back({optionNumber++, "Quit"});
 
@@ -857,8 +856,6 @@ void adminMenu(User& currentUser, vector<User>& users,
          // cout << "📚 Borrow Book function here\n";
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
-      } else if (selected == "Borrower Name List") {
-         displayBorrowers(borrowers);
       } else if (selected == "Change Password") {
          changePassword(currentUser, users);
       } else if (selected == "Quit") {

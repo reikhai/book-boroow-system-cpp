@@ -262,13 +262,71 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
 // === End ===
 
 // === Adrian ===
-void addBook() {
-   // 在这里写logic
-   cout << "\nPress Enter to return to menu...";
-   cout << "\nChange by adrian" << endl;
-   cin.ignore();
-   cin.get();  // Wait for user input before returning
+// Function to save all books to a file
+void saveBooksToFile(const vector<Book>& books) {
+    ofstream file("data/books.txt");
+    for (const auto& book : books) {
+        file << book.id << "|"
+             << book.title << "|"
+             << book.author << "|"
+             << book.isbn << "|"
+             << book.copies << "|"
+             << book.created_at << "\n";
+    }
+    file.close();
 }
+
+// Function to get current date as string
+string getCurrentDate() {
+    time_t now = time(0);
+    tm* localTime = localtime(&now);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d", localTime);
+    return string(buffer);
+}
+
+// Simplified addBook function
+void addBook(vector<Book>& books) {
+    Book newBook;
+    cin.ignore();
+    cout << "\n=== Add New Book ===" << endl;
+    cout << "Enter book title: ";
+    getline(cin, newBook.title);
+    cout << "Enter author name: ";
+    getline(cin, newBook.author);
+    cout << "Enter ISBN: ";
+    getline(cin, newBook.isbn);
+
+    // Check for duplicate ISBN (no update logic)
+    for (const auto& book : books) {
+        if (book.isbn == newBook.isbn) {
+            cout << "\n Book with ISBN " << newBook.isbn 
+                 << " already exists in the system.\n";
+            return;
+        }
+    }
+
+    cout << "Enter number of copies: ";
+    while (!(cin >> newBook.copies) || newBook.copies <= 0) {
+        cout << "Invalid input. Please enter a positive number: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    newBook.id = books.size() + 1;
+   //  newBook.created_at = getCurrentDate();
+   time_t now = time(0);
+      tm* ltm = localtime(&now);
+      char buffer[20];
+      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+      newBook.created_at = buffer;
+
+    books.push_back(newBook);
+    saveBooksToFile(books);
+
+    cout << "\n Book added and saved successfully!\n";
+}
+
 // === End ===
 
 // === Annie ===
@@ -668,7 +726,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Admin Listing") {
          getAdminsListing(users);
       } else if (selected == "Add Book") {
-         addBook();
+         addBook(books);
       } else if (selected == "Add Borrower") {
          addBorrower(borrowers);
       } else if (selected == "Borrow Book") {

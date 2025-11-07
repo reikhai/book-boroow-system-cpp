@@ -338,7 +338,7 @@ void updateBorrowers(vector<Borrower>& borrowers) {
    }
 }
 
-// === Add new borrower ===
+// ---------------- Add new borrower ----------------
 void addBorrower(vector<Borrower>& borrowers) {
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -410,7 +410,7 @@ void addBorrower(vector<Borrower>& borrowers) {
    }
 }
 
-// === Display all borrowers ===
+// ---------------- Display all borrowers ----------------
 void displayBorrowers(vector<Borrower>& borrowers) {
    cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
 
@@ -438,6 +438,58 @@ bool isNumber(const string &s) {
         if (!isdigit(c)) return false;
     return !s.empty();
    }
+
+// ---------------- Display borrowers with borrow records----------------
+void displayBorrowersWithBooks(vector<Borrower>& borrowers, 
+                               vector<Book>& books, 
+                               vector<BorrowRecord>& borrow_records) {
+    cout << YELLOW << "\n======== Borrower List with Borrowed Books ========\n" << RESET;
+
+    if (borrowers.empty()) {
+        cout << RED << "No borrower records found!" << RESET << endl;
+        return;
+   }
+
+    for (const auto& borrower : borrowers) {
+        cout << "\n" << string(90, '-') << "\n";
+        cout << GREEN << "Borrower ID: " << borrower.id << RESET << endl;
+        cout << "Name    : " << borrower.name << endl;
+        cout << "Address : " << borrower.address << endl;
+        cout << "Contact : " << borrower.contact << endl;
+        cout << "ID Number : " << borrower.ic_no << endl;
+
+        // Find all records this borrower has borrowed but not yet returned
+        bool hasBorrowed = false;
+        for (const auto& record : borrow_records) {
+            if (record.borrower_id == borrower.id && record.status == 0) {
+                hasBorrowed = true;
+                // Find the book title
+                string bookTitle = "Unknown";
+                for (const auto& book : books) {
+                    if (book.id == record.book_id) {
+                        bookTitle = book.title;
+                        break;
+                    }
+                }
+
+                cout << "   → " << bookTitle 
+                     << " (Borrowed on: " << record.borrow_date
+                     << ", Due: " << record.due_date << ")" << endl;
+            }
+        }
+
+        if (!hasBorrowed) {
+            cout << RED << "No books currently borrowed." << RESET << endl;
+        }
+    }
+
+    cout << "\n" << string(90, '-') << "\n";
+    cout << "Press Enter to return to the main menu...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}
+
+
 // === JY ===
 void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
                      vector<BorrowRecord>& borrow_records) {

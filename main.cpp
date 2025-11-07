@@ -419,12 +419,12 @@ void displayBorrowers(vector<Borrower>& borrowers) {
       return;
    }
 
-   cout << left << "ID" << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
+   cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
         << "Address" << "ID\n";
    cout << string(60, '-') << "\n";
 
    for (auto& b : borrowers) {
-      cout << left << b.id << setw(20) << b.name << setw(15) << b.contact << setw(35)
+      cout << left << setw(5) << b.id << setw(20) << b.name << setw(15) << b.contact << setw(35)
            << b.address << b.ic_no << "\n";
    }
 

@@ -334,7 +334,7 @@ void updateBorrowers(vector<Borrower>& borrowers) {
    ofstream file("data/borrowers.txt");
    for (auto& b : borrowers) {
       file << b.id << '|' << b.name << '|' << b.address << '|' << b.contact
-           << '|' << b.created_at << "\n";
+           << '|' << b.ic_no << '|' << b.created_at << "\n";
    }
 }
 
@@ -988,8 +988,9 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Quit") {
          return;
       } else if (selected == "Borrower List") {
-         displayBorrowers(borrowers);
+         displayBorrowersWithBooks(borrowers, books, borrow_records);
       }
+      
    }
 }
 

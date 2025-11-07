@@ -59,6 +59,10 @@ const string USER_FILE = "data/users.txt";
 vector<Borrower> borrowers;
 vector<Book> books;
 vector<BorrowRecord> borrow_records;
+vector<Borrower> loadBorrowers();
+vector<Book> loadBooks();
+vector<BorrowRecord> loadBorrowRecords();
+
 
 const int WIDTH = 46;
 
@@ -406,9 +410,12 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 // === End ===
 
 // === JY ===
-void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books, vector<BorrowRecord>& borrow_records) {
- 
-   cin.ignore(numeric_limits<streamsize>::max(), '\n');
+void addBorrowRecord() {
+   borrowers = loadBorrowers();
+    books = loadBooks();
+    borrow_records = loadBorrowRecords();
+  
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     vector<pair<int, string>> borrowedBooks;
     string borrowerName;
     
@@ -460,12 +467,12 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books, vector<Bo
         do {
             // Display available books
             cout << "\nAvailable Books:\n";
-            cout << string(70, '-') << "\n";
+            cout << string(85, '-') << "\n";
             cout << left << setw(5) << "ID" 
                  << setw(35) << "Title"
                  << setw(20) << "Author" 
                  << "Quantity\n";
-            cout << string(80, '-') << "\n";
+            cout << string(85, '-') << "\n";
 
             for (const auto& b : books) {
             // Show all books, but highlight those with 0 qty in red
@@ -477,7 +484,7 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books, vector<Bo
                  << setw(20) << b.author 
                  << b.copies << RESET << "\n";
         }
-        cout << string(80, '-') << "\n";
+        cout << string(85, '-') << "\n";
         cout << RED << "Note: Red items are currently out of stock" << RESET << "\n";
 
             // Get book ID
@@ -578,7 +585,7 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books, vector<Bo
         updateBorrowRecords(borrow_records);
         updateBooks(books);
 
-        cout << "\nPress Enter to return to menu...";
+        cout << "\nBook issued successfully\n" << "Press Enter to return to menu...";
         cin.get();
         break;
     }
@@ -897,7 +904,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Borrower") {
          addBorrower(borrowers);
       } else if (selected == "Borrow Book") {
-         addBorrowRecord(borrowers, books, borrow_records); 
+         addBorrowRecord(); 
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {

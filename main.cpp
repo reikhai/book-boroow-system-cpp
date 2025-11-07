@@ -419,12 +419,12 @@ void displayBorrowers(vector<Borrower>& borrowers) {
       return;
    }
 
-   cout << left << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
+   cout << left << "ID" << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
         << "Address" << "ID\n";
    cout << string(60, '-') << "\n";
 
    for (auto& b : borrowers) {
-      cout << left << setw(20) << b.name << setw(15) << b.contact << setw(35)
+      cout << left << b.id << setw(20) << b.name << setw(15) << b.contact << setw(35)
            << b.address << b.ic_no << "\n";
    }
 
@@ -443,7 +443,7 @@ bool isNumber(const string &s) {
 void displayBorrowersWithBooks(vector<Borrower>& borrowers, 
                                vector<Book>& books, 
                                vector<BorrowRecord>& borrow_records) {
-    cout << YELLOW << "\n======== Borrower List with Borrowed Books ========\n" << RESET;
+    cout << YELLOW << "\n======== List of Borrowed Books ========\n" << RESET;
 
     if (borrowers.empty()) {
         cout << RED << "No borrower records found!" << RESET << endl;
@@ -472,7 +472,7 @@ void displayBorrowersWithBooks(vector<Borrower>& borrowers,
                     }
                 }
 
-                cout << "   → " << bookTitle 
+                cout << "   - " << bookTitle 
                      << " (Borrowed on: " << record.borrow_date
                      << ", Due: " << record.due_date << ")" << endl;
             }

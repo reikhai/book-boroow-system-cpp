@@ -421,7 +421,7 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 
    cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
         << "Address" << "ID\n";
-   cout << string(60, '-') << "\n";
+   cout << string(80, '-') << "\n";
 
    for (auto& b : borrowers) {
       cout << left << setw(5) << b.id << setw(20) << b.name << setw(15) << b.contact << setw(35)

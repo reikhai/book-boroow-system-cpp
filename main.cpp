@@ -1,11 +1,13 @@
-#include <ctime>
-#include <filesystem>
+#include <algorithm> // for transform()
+#include <ctime>   // for time functions
+#include <filesystem> // For file existence check
 #include <fstream>  // For file operations
 #include <iomanip>  // for setw()
-#include <iostream>
+#include <iostream> // For input/output
 #include <sstream>  // For splitting text lines
-#include <string>
-#include <vector>
+#include <string> // For string operations
+#include <vector> // For using vectors
+#include <limits> // For numeric_limits
 
 using namespace std;
 
@@ -404,129 +406,182 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 // === End ===
 
 // === JY ===
-void addBorrowRecord() {
-   // example function
+void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books, vector<BorrowRecord>& borrow_records) {
+ 
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    vector<pair<int, string>> borrowedBooks;
+    string borrowerName;
+    
+    while (true) {
+        cout << YELLOW << "\n======== Borrow Book ========\n" << RESET;
+ 
+        // Display borrowers list
+        cout << "\nAvailable Borrowers:\n";
+        cout << string(85, '-') << "\n";
+        cout << left << setw(5) << "ID" 
+             << setw(25) << "Name" 
+             << setw(15) << "IC Number"
+             << setw(15) << "Contact" 
+             << "Address\n";
+        cout << string(85, '-') << "\n";
 
-   while (true) {
-      string borrowerName, bookTitle;
-      cout << YELLOW
-           << "\n======== Press ESC then Enter to return ======= " << RESET
-           << "\n";
+        for (const auto& b : borrowers) {
+            cout << left << setw(5) << b.id 
+                 << setw(25) << b.name 
+                 << setw(15) << b.ic_no
+                 << setw(15) << b.contact 
+                 << b.address << "\n";
+        }
+        cout << string(85, '-') << "\n";
 
-      string title = "Borrow Book";
-      int leftPad = (WIDTH - title.size()) / 2;
-      int rightPad = WIDTH - title.size() - leftPad;
+        // Get borrower ID
+        int borrowerId;
+        cout << "\nEnter Borrower ID (or 0 to exit): ";
+        cin >> borrowerId;
+        cin.ignore();
 
-      cout << "+" << string(WIDTH, '-') << "+\n";
-      cout << "|" << string(leftPad, ' ') << title << string(rightPad, ' ')
-           << "|\n";
-      cout << "+" << string(WIDTH, '-') << "+\n";
+        if (borrowerId == 0) return;
 
-      cout << "Enter borrower name: ";
-      getline(cin, borrowerName);
+        // Find borrower
+        bool found = false;
+        for (const auto& b : borrowers) {
+            if (b.id == borrowerId) {
+                borrowerName = b.name;
+                found = true;
+                break;
+            }
+        }
 
-      if (borrowerName == ESC) return;
+        if (!found) {
+            cout << RED << "Invalid borrower ID!" << RESET << "\n";
+            continue;
+        }
 
-      cout << "Enter book title: ";
-      getline(cin, bookTitle);
+        do {
+            // Display available books
+            cout << "\nAvailable Books:\n";
+            cout << string(70, '-') << "\n";
+            cout << left << setw(5) << "ID" 
+                 << setw(35) << "Title"
+                 << setw(20) << "Author" 
+                 << "Quantity\n";
+            cout << string(80, '-') << "\n";
 
-      if (bookTitle == ESC) return;
+            for (const auto& b : books) {
+            // Show all books, but highlight those with 0 qty in red
+            if (b.copies == 0) {
+                cout << RED;
+            }
+            cout << left << setw(5) << b.id 
+                 << setw(35) << b.title 
+                 << setw(20) << b.author 
+                 << b.copies << RESET << "\n";
+        }
+        cout << string(80, '-') << "\n";
+        cout << RED << "Note: Red items are currently out of stock" << RESET << "\n";
 
-      // Find borrower
-      int borrowerId = -1;
-      for (auto& b : borrowers) {
-         if (b.name == borrowerName) {
-            borrowerId = b.id;
-            break;
-         }
-      }
+            // Get book ID
+            int bookId;
+            cout << "\nEnter Book ID (or 0 to exit): ";
+            cin >> bookId;
+            cin.ignore();
+// Check if user wants to finish
+            if (bookId == 0) {
+                if (borrowedBooks.empty()) {
+                    cout << RED << "No books borrowed yet!" << RESET << "\n";
+                    return;
+                }
+                break;  // Break the do-while loop to show results
+            }
 
-      if (borrowerId == -1) {
-         cout << RED << "Borrower not found." << RESET << "\n";
-         continue;
-      }
+            // Find and validate book
+            Book* selectedBook = nullptr;
+            for (auto& b : books) {
+                if (b.id == bookId && b.copies > 0) {
+                    selectedBook = &b;
+                    break;
+                }
+            }
 
-      // Find book
-      Book* book = nullptr;
-      for (auto& b : books) {
-         if (b.title == bookTitle) {
-            book = &b;
-            break;
-         }
-      }
+            if (!selectedBook) {
+                cout << RED << "Invalid book ID or no copies available!" << RESET << "\n";
+                continue;
+            }
 
-      if (!book) {
-         cout << RED << "Book not found." << RESET << "\n";
-         continue;
-      }
+            // Check if book is available
+        if (selectedBook->copies <= 0) {
+            cout << RED << "Error: '" << selectedBook->title 
+                 << "' is currently out of stock!" << RESET << "\n";
+            
+            char retry;
+            cout << "Would you like to choose another book? (y/n): ";
+            cin >> retry;
+            cin.ignore();
+            
+            if (tolower(retry) != 'y') {
+                break;
+            }
+            continue;
+        }
 
-      // Check if book is available
-      if (book->copies <= 0) {
-         cout << RED << "Sorry, no copies available for this book." << RESET
-              << "\n";
-         continue;
-      }
 
-      // Get quantity to borrow
-      int quantity;
-      cout << "Enter quantity to borrow (max " << book->copies << "): ";
-      cin >> quantity;
+            // Create borrow record
+            BorrowRecord newRecord;
+            newRecord.id = borrow_records.empty() ? 1 : borrow_records.back().id + 1;
+            newRecord.borrower_id = borrowerId;
+            newRecord.book_id = bookId;
+            newRecord.quantity = 1;
+            newRecord.status = 0;
 
-      if (quantity <= 0 || quantity > book->copies) {
-         cout << RED << "Invalid quantity." << RESET << "\n";
-         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-         continue;
-      }
+            // Set dates
+            time_t now = time(0);
+            tm* ltm = localtime(&now);
+            char buffer[20];
+            
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+            newRecord.borrow_date = buffer;
+            
+            ltm->tm_mday += 21;
+            mktime(ltm);
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
+            newRecord.due_date = buffer;
+            
+            newRecord.return_date = "NULL";
+            newRecord.penalty_amt = 0;
+            newRecord.created_at = newRecord.borrow_date;
+            newRecord.created_by = 1;
 
-      // Create borrow record
-      BorrowRecord newRecord;
-      newRecord.id = borrow_records.empty() ? 1 : borrow_records.back().id + 1;
-      newRecord.borrower_id = borrowerId;
-      newRecord.book_id = book->id;
-      newRecord.quantity = quantity;
-      newRecord.status = 0;  // 0 = active, 1 = returned
+            // Update book copies and save changes
+            selectedBook->copies--;
+            borrow_records.push_back(newRecord);
+            borrowedBooks.push_back({bookId, selectedBook->title});
 
-      // Set dates
-      time_t now = time(0);
-      tm* ltm = localtime(&now);
-      char buffer[20];
+            // Ask if want to borrow more books
+            char more;
+            cout << "\nBorrow another book? (y/n): ";
+            cin >> more;
+            cin.ignore();
 
-      // Borrow date (now)
-      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
-      newRecord.borrow_date = buffer;
+            if (tolower(more) != 'y') break;
 
-      // Due date (now + 21 days)
-      ltm->tm_mday += 21;
-      mktime(ltm);
-      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
-      newRecord.due_date = buffer;
+        } while (true);
 
-      newRecord.return_date = "NULL";
-      newRecord.penalty_amt = 0;
+        // Display summary
+        cout << "\n" << string(40, '-') << "\n";
+        cout << borrowerName << " borrowed:\n\n";
+        for (const auto& book : borrowedBooks) {
+            cout << book.second << "\n";
+        }
+        cout << string(40, '-') << "\n";
 
-      // Created at
-      ltm = localtime(&now);
-      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
-      newRecord.created_at = buffer;
-      newRecord.created_by = 1;  // Current user ID should be used here
+        // Save all changes
+        updateBorrowRecords(borrow_records);
+        updateBooks(books);
 
-      // Update book copies
-      book->copies -= quantity;
-
-      // Save changes
-      borrow_records.push_back(newRecord);
-      updateBorrowRecords(borrow_records);
-      updateBooks(books);
-
-      cout << GREEN << "\nBook borrowed successfully!" << RESET << "\n";
-      cout << "Due date: " << newRecord.due_date << "\n";
-
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
-      cout << "\nPress Enter to continue...";
-      cin.get();
-      break;
-   }
+        cout << "\nPress Enter to return to menu...";
+        cin.get();
+        break;
+    }
 }
 // === End ===
 
@@ -842,7 +897,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       } else if (selected == "Add Borrower") {
          addBorrower(borrowers);
       } else if (selected == "Borrow Book") {
-         addBorrowRecord();
+         addBorrowRecord(borrowers, books, borrow_records); 
       } else if (selected == "Return Book") {
          returnBook(borrowers, books, borrow_records);
       } else if (selected == "Change Password") {

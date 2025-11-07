@@ -358,19 +358,32 @@ void addBorrower(vector<Borrower>& borrowers) {
 
       cout << "Enter Full Name (or type'exit' to return): ";
       getline(cin, b.name);
-      if (b.name == "exit") return;
+      if (b.name == "exit" || b.name == "Exit" || b.name == "EXIT") {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       cout << "Enter Address (or type'exit' to return): ";
       getline(cin, b.address);
-      if (b.address == "exit") return;
+      if (b.address == "exit" || b.address == "Exit" || b.address == "EXIT") {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       cout << "Enter Contact Number (or type'exit' to return): ";
       getline(cin, b.contact);
-      if (b.contact == "exit") return;
+      if (b.contact == "exit" || b.contact == "Exit" || b.contact == "EXIT") {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       cout << "Enter ID Number (or type'exit' to return): ";
       getline(cin, b.ic_no);
-      if (b.ic_no == "exit") return;
+      if (b.ic_no == "exit" || b.ic_no == "Exit" || b.ic_no == "EXIT") return;
+      if (b.ic_no == "exit" || b.ic_no == "Exit" || b.ic_no == "EXIT") {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       // time/date
       time_t now = time(0);
@@ -384,11 +397,16 @@ void addBorrower(vector<Borrower>& borrowers) {
 
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
 
-      char choice;
-      cout << "\nAdd another borrower?(Y/N): ";
+      string choice;
+      cout << "\nAdd another borrower?(Y/N or type'exit' to return): ";
       cin >> choice;
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
-      if (toupper(choice) != 'Y') break;
+      
+      if (choice == "exit" || choice == "Exit" || choice == "EXIT" || 
+         choice == "n" || choice == "N") {
+         cout << "\nReturning to main menu...\n";
+         break;
+      }
    }
 }
 
@@ -401,20 +419,20 @@ void displayBorrowers(vector<Borrower>& borrowers) {
       return;
    }
 
-   cout << left << setw(5) << "ID" << setw(20) << "Name" << setw(15)
-        << "Contact" << "Address\n";
+   cout << left << setw(20) << "Name" << setw(15) << "Contact" << setw(35)
+        << "Address" << "ID\n";
    cout << string(60, '-') << "\n";
 
    for (auto& b : borrowers) {
-      cout << left << setw(5) << b.id << setw(20) << b.name << setw(15)
-           << b.contact << b.address << "\n";
+      cout << left << setw(20) << b.name << setw(15) << b.contact << setw(35)
+           << b.address << b.ic_no << "\n";
    }
 
    cout << "\nPress Enter to return to menu...";
    cin.ignore();
    cin.get();
 }
-// === End ===
+
 bool isNumber(const string &s) {
     for (char c : s)
         if (!isdigit(c)) return false;

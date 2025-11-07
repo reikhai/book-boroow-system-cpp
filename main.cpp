@@ -356,12 +356,21 @@ void addBorrower(vector<Borrower>& borrowers) {
       Borrower b;
       b.id = borrowers.empty() ? 1 : borrowers.back().id + 1;
 
-      cout << "Enter borrower name    : ";
+      cout << "Enter Full Name (or type'exit' to return): ";
       getline(cin, b.name);
-      cout << "Enter contact number   : ";
-      getline(cin, b.contact);
-      cout << "Enter borrower address : ";
+      if (b.name == "exit") return;
+
+      cout << "Enter Address (or type'exit' to return): ";
       getline(cin, b.address);
+      if (b.address == "exit") return;
+
+      cout << "Enter Contact Number (or type'exit' to return): ";
+      getline(cin, b.contact);
+      if (b.contact == "exit") return;
+
+      cout << "Enter ID Number (or type'exit' to return): ";
+      getline(cin, b.ic_no);
+      if (b.ic_no == "exit") return;
 
       // time/date
       time_t now = time(0);
@@ -403,7 +412,7 @@ void displayBorrowers(vector<Borrower>& borrowers) {
 
    cout << "\nPress Enter to return to menu...";
    cin.ignore();
-   cin.get();  // Wait for user input before returning
+   cin.get();
 }
 // === End ===
 bool isNumber(const string &s) {

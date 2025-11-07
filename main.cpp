@@ -424,14 +424,13 @@ void addBorrowRecord() {
       // Display borrowers list
       cout << "\nAvailable Borrowers:\n";
       cout << string(85, '-') << "\n";
-      cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(15)
-           << "IC Number" << setw(15) << "Contact"
-           << "Address\n";
+      cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20)
+           << "IC Number" << setw(18) << "Contact" << "Address\n";
       cout << string(85, '-') << "\n";
 
       for (const auto& b : borrowers) {
-         cout << left << setw(5) << b.id << setw(25) << b.name << setw(15)
-              << b.ic_no << setw(15) << b.contact << b.address << "\n";
+         cout << left << setw(5) << b.id << setw(25) << b.name << setw(20)
+              << b.ic_no << setw(18) << b.contact << b.address << "\n";
       }
       cout << string(85, '-') << "\n";
 

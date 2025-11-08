@@ -485,37 +485,6 @@ void addBorrower(vector<Borrower>& borrowers) {
    }
 }
 
-// ---------------- Display all borrowers ----------------
-void displayBorrowers(vector<Borrower>& borrowers) {
-   cout << YELLOW << "\n======== Borrower List ========\n" << RESET;
-
-   if (borrowers.empty()) {
-      cout << RED << "No borrower records found.\n" << RESET;
-      return;
-   }
-
-   cout << string(85, '-') << "\n";
-   cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20)
-        << "IC Number" << setw(18) << "Contact" << "Address\n";
-   cout << string(85, '-') << "\n";
-
-   for (auto& b : borrowers) {
-      cout << left << setw(5) << b.id << setw(25) << b.name << setw(20)
-           << b.ic_no << setw(18) << b.contact << b.address << "\n";
-   }
-   cout << string(85, '-') << "\n";
-
-   cout << "\nPress Enter to return to menu...";
-   cin.ignore();
-   cin.get();
-}
-
-bool isNumber(const string& s) {
-   for (char c : s)
-      if (!isdigit(c)) return false;
-   return !s.empty();
-}
-
 // ---------------- Display borrowers with borrow records----------------
 void displayBorrowersWithBooks(vector<Borrower>& borrowers, vector<Book>& books,
                                vector<BorrowRecord>& borrow_records) {
@@ -1044,7 +1013,6 @@ void adminMenu(User& currentUser, vector<User>& users,
       menu.push_back({optionNumber++, "Add Borrower"});
       menu.push_back({optionNumber++, "Borrow Book"});
       menu.push_back({optionNumber++, "Return Book"});
-      menu.push_back({optionNumber++, "Borrower List"});
       menu.push_back({optionNumber++, "List of Borrowed Books"});
       menu.push_back({optionNumber++, "List of Book Inventory"});
       menu.push_back({optionNumber++, "Change Password"});
@@ -1099,8 +1067,6 @@ void adminMenu(User& currentUser, vector<User>& users,
          changePassword(currentUser, users);
       } else if (selected == "Quit") {
          return;
-      } else if (selected == "Borrower List") {
-         displayBorrowers(borrowers);
       } else if (selected == "List of Borrowed Books") {
          displayBorrowersWithBooks(borrowers, books, borrow_records);
       } else if (selected == "List of Book Inventory") {

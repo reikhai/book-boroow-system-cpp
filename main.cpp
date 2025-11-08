@@ -264,9 +264,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
 
       updateBooks(books);
       updateBorrowRecords(borrow_records);
-      cout << GREEN
-           << "\nAll return processes completed.\n"
-           << RESET;
+      cout << GREEN << "\nAll return processes completed.\n" << RESET;
 
       string again;
       cout << "\nContinue returning books? (y/n): ";
@@ -285,10 +283,12 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
 
 void bookInventory(const std::vector<Book>& books,
                    const std::vector<BorrowRecord>& borrowRecords) {
+   clearScreen();
+   cout << YELLOW << "\n======== List of Books Inventory ========\n" << RESET;
+
    if (books.empty()) {
       std::cout << "\nNo books in inventory.\n";
    }
-
    for (const auto& book : books) {
       int checkedOut = 0;
 

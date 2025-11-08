@@ -284,45 +284,57 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
 void bookInventory(const std::vector<Book>& books,
                    const std::vector<BorrowRecord>& borrowRecords) {
    clearScreen();
-   cout << YELLOW << "\n======== List of Books Inventory ========\n" << RESET;
+
+   cout << YELLOW << "\n============ List of Books Inventory ============\n"
+        << RESET;
 
    if (books.empty()) {
-      std::cout << "\nNo books in inventory.\n";
+      cout << RED << "\nNo books in inventory.\n" << RESET;
+      cout << "\nPress Enter to return to the main menu...";
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      cin.get();
+      return;
    }
+
+   // Header
+   cout << std::left << std::setw(6) << "ID" << std::setw(30) << "Title"
+        << std::setw(22) << "Author" << std::setw(15) << "ISBN" << std::setw(12)
+        << "Total" << std::setw(12) << "Borrowed" << std::setw(12)
+        << "Available"
+        << "\n";
+
+   cout << string(109, '-') << "\n";
+
+   // Rows
    for (const auto& book : books) {
       int checkedOut = 0;
 
-      // Count borrowed copies
-      for (const auto& record : borrowRecords) {
-         if (record.book_id == book.id && record.status == 1) {
+      for (const auto& record : borrowRecords)
+         if (record.book_id == book.id && record.status == 1)
             checkedOut += record.quantity;
-         }
-      }
 
       int available = book.copies - checkedOut;
       if (available < 0) available = 0;
 
-      // ---------- Display Section ----------
-      std::cout << "\n----------------------------------------\n";
-      std::cout << "Book ID.       : " << book.id << std::endl;
-      std::cout << "Title          : " << book.title << std::endl;
-      std::cout << "Author         : " << book.author << std::endl;
-      std::cout << "ISBN           : " << book.isbn << std::endl;
-      std::cout << "Total Copies   : " << book.copies << std::endl;
+      cout << std::left << std::setw(6) << book.id << std::setw(30)
+           << book.title << std::setw(22) << book.author << std::setw(15)
+           << book.isbn << std::setw(12) << book.copies << std::setw(12)
+           << checkedOut;
 
-      if (available == 0) {
-         cout << RED << "Available      : " << available << RESET << endl;
-      } else {
-         cout << GREEN << "Available      : " << available << RESET << endl;
-      }
+      // Available Color
+      if (available == 0)
+         cout << RED << std::setw(12) << available << RESET << "\n";
+      else
+         cout << GREEN << std::setw(12) << available << RESET << "\n";
    }
 
-   std::cout << "\n----------------------------------------\n";
-   std::cout << "Press Enter to return to the main menu...";
+   cout << "\n" << string(109, '-') << "\n";
+   cout << "Press Enter to return to the main menu...";
 
-   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-   std::cin.get();
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
+   cin.get();
 }
+
 // === End ===
 
 // === Adrian ===

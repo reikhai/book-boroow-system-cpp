@@ -1001,7 +1001,6 @@ void adminMenu(User& currentUser, vector<User>& users,
                vector<BorrowRecord>& borrow_records) {
    // handle admin menu
    while (true) {
-      clearScreen();
 
       string title = "ADMIN MENU";
       int leftPad = (WIDTH - title.size()) / 2;

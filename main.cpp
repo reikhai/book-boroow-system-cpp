@@ -323,7 +323,6 @@ void bookInventory(const std::vector<Book>& books,
    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
    std::cin.get();
 }
-
 // === End ===
 
 // === Adrian ===
@@ -335,15 +334,6 @@ void saveBooksToFile(const vector<Book>& books) {
            << book.isbn << "|" << book.copies << "|" << book.created_at << "\n";
    }
    file.close();
-}
-
-// Function to get current date as string
-string getCurrentDate() {
-   time_t now = time(0);
-   tm* localTime = localtime(&now);
-   char buffer[80];
-   strftime(buffer, sizeof(buffer), "%Y-%m-%d", localTime);
-   return string(buffer);
 }
 
 // Simplified addBook function

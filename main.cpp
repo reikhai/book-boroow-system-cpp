@@ -351,16 +351,17 @@ void saveBooksToFile(const vector<Book>& books) {
 // Simplified addBook function
 void addBook(vector<Book>& books) {
    Book newBook;
-   cin.ignore();
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
    cout << "\n=== Add New Book ===" << endl;
-   cout << "Enter book title (or type'exit' to return): ";
+
+   cout << "Enter Book Title (or type'exit' to return): ";
    getline(cin, newBook.title);
    if (checkExit(newBook.title)) {
       cout << "\nReturning to main menu...\n";
       return;
    }
 
-   cout << "Enter author name (or type'exit' to return): ";
+   cout << "Enter Author Name (or type'exit' to return): ";
    getline(cin, newBook.author);
    if (checkExit(newBook.author)) {
       cout << "\nReturning to main menu...\n";
@@ -377,7 +378,7 @@ void addBook(vector<Book>& books) {
    // Check for duplicate ISBN (no update logic)
    for (const auto& book : books) {
       if (book.isbn == newBook.isbn) {
-         cout << RED << "\n Book with ISBN " << newBook.isbn
+         cout << RED << "\nBook with ISBN " << newBook.isbn
               << " already exists in the system.\n"
               << RESET;
          return;

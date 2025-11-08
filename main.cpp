@@ -368,21 +368,31 @@ void addBook(vector<Book>& books) {
       return;
    }
 
-   cout << "Enter ISBN (or type'exit' to return): ";
-   getline(cin, newBook.isbn);
-   if (checkExit(newBook.isbn)) {
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
+   while (true) {
+      cout << "Enter ISBN (or type 'exit' to return): ";
+      getline(cin, newBook.isbn);
 
-   // Check for duplicate ISBN (no update logic)
-   for (const auto& book : books) {
-      if (book.isbn == newBook.isbn) {
-         cout << RED << "\nBook with ISBN " << newBook.isbn
-              << " already exists in the system.\n"
-              << RESET;
+      if (checkExit(newBook.isbn)) {
+         cout << "\nReturning to main menu...\n";
          return;
       }
+
+      bool duplicate = false;
+      for (const auto& book : books) {
+         if (book.isbn == newBook.isbn) {
+            duplicate = true;
+            break;
+         }
+      }
+
+      if (duplicate) {
+         cout << RED << "\nBook with ISBN \"" << newBook.isbn
+              << "\" already exists. Please enter a different ISBN.\n\n"
+              << RESET;
+         continue;
+      }
+
+      break;
    }
 
    cout << "Enter number of copies: ";

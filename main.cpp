@@ -100,12 +100,10 @@ void updateBorrowRecords(vector<BorrowRecord>& borrow_records) {
 void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
                 vector<BorrowRecord>& borrow_records) {
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+   clearScreen();
 
    while (true) {
       string borrowerName, bookTitle;
-      cout << YELLOW
-           << "\n======== Press ESC then Enter to return ======= " << RESET
-           << "\n";
 
       string title = "Return Book";
       int leftPad = (WIDTH - title.size()) / 2;
@@ -116,7 +114,7 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
            << "|\n";
       cout << "+" << string(WIDTH, '-') << "+\n";
 
-      cout << "Enter borrower name: ";
+      cout << "Enter borrower name (or type'exit' to return): ";
       getline(cin, borrowerName);
 
       if (checkExit(borrowerName)) {
@@ -124,7 +122,8 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
          return;
       }
 
-      cout << "Enter book title (multiple allowed, split by comma): ";
+      cout << "Enter book title (multiple allowed, split by comma) (or "
+              "type'exit' to return): ";
       getline(cin, bookTitle);
 
       if (checkExit(bookTitle)) {
@@ -246,10 +245,10 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
          cout << "\nTotal Fine = RM " << totalFine << "\n\n";
 
          string payChoice;
-         cout << "Pay now? (yes/no): ";
+         cout << "Pay now? (y/n): ";
          cin >> payChoice;
 
-         if (payChoice != "yes") {
+         if (payChoice != "y") {
             cout << RED << "Return cancelled. Please settle payment first."
                  << RESET << "\n";
             return;
@@ -266,12 +265,21 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       updateBooks(books);
       updateBorrowRecords(borrow_records);
       cout << GREEN
-           << "\nAll return processes completed. No overdue records found. \n"
+           << "\nAll return processes completed.\n"
            << RESET;
 
-      cin.ignore();
-      cin.get();
-      break;
+      string again;
+      cout << "\nContinue returning books? (y/n): ";
+      cin >> again;
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+      if (again == "y" || again == "Y") {
+         clearScreen();
+         continue;
+      } else {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
    }
 }
 
@@ -343,21 +351,21 @@ void addBook(vector<Book>& books) {
    Book newBook;
    cin.ignore();
    cout << "\n=== Add New Book ===" << endl;
-   cout << "Enter book title: ";
+   cout << "Enter book title (or type'exit' to return): ";
    getline(cin, newBook.title);
    if (checkExit(newBook.title)) {
       cout << "\nReturning to main menu...\n";
       return;
    }
 
-   cout << "Enter author name: ";
+   cout << "Enter author name (or type'exit' to return): ";
    getline(cin, newBook.author);
    if (checkExit(newBook.author)) {
       cout << "\nReturning to main menu...\n";
       return;
    }
 
-   cout << "Enter ISBN: ";
+   cout << "Enter ISBN (or type'exit' to return): ";
    getline(cin, newBook.isbn);
    if (checkExit(newBook.isbn)) {
       cout << "\nReturning to main menu...\n";
@@ -892,7 +900,7 @@ void addAdmin(vector<User>& users) {
    int roleChoice;
 
    cout << "\n=== Add New Admin ===\n";
-   cout << "Enter new admin username: ";
+   cout << "Enter new admin username (or type'exit' to return): ";
    cin >> username;
 
    if (checkExit(username)) {
@@ -909,7 +917,7 @@ void addAdmin(vector<User>& users) {
       }
    }
 
-   cout << "Enter password: ";
+   cout << "Enter password (or type'exit' to return): ";
    cin >> password;
 
    if (checkExit(password)) {
@@ -947,7 +955,7 @@ void addAdmin(vector<User>& users) {
 
 void resetUserPassword(vector<User>& users) {
    string targetUser;
-   cout << "Enter username to reset password: ";
+   cout << "Enter username to reset password (or type'exit' to return): ";
    cin >> targetUser;
 
    if (checkExit(targetUser)) {
@@ -957,7 +965,7 @@ void resetUserPassword(vector<User>& users) {
 
    for (auto& u : users) {
       if (u.username == targetUser) {
-         cout << "Enter new password: ";
+         cout << "Enter new password (or type'exit' to return): ";
          cin >> u.password;
 
          if (checkExit(u.password)) {
@@ -978,7 +986,7 @@ void resetUserPassword(vector<User>& users) {
 void changePassword(User& currentUser, vector<User>& users) {
    string oldPass, newPass;
    cout << "\n=== Change Your Password ===\n";
-   cout << "Enter current password: ";
+   cout << "Enter current password (or type'exit' to return): ";
    cin >> oldPass;
 
    if (checkExit(oldPass)) {
@@ -991,7 +999,7 @@ void changePassword(User& currentUser, vector<User>& users) {
       return;
    }
 
-   cout << "Enter new password: ";
+   cout << "Enter new password (or type'exit' to return): ";
    cin >> newPass;
 
    if (checkExit(newPass)) {

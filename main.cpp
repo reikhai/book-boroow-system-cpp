@@ -1,4 +1,5 @@
 #include <algorithm>   // for transform()
+#include <algorithm>   // for transform
 #include <cctype>      // for isdigit()
 #include <ctime>       // for time functions
 #include <filesystem>  // For file existence check
@@ -6,11 +7,10 @@
 #include <iomanip>     // for setw()
 #include <iostream>    // For input/output
 #include <limits>      // For numeric_limits
-#include <map>
-#include <sstream>  // For splitting text lines
-#include <string>   // For string operations
-#include <variant>  // For using variant
-#include <vector>   // For using vectors
+#include <sstream>     // For splitting text lines
+#include <string>      // For string operations
+#include <variant>     // For using variant
+#include <vector>      // For using vectors
 
 using namespace std;
 
@@ -73,6 +73,11 @@ void clearScreen() {
 #endif
 }
 
+bool checkExit(string s) {
+   std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+   return s == "exit";
+}
+
 // === Rei Khai ===
 void updateBooks(vector<Book>& books) {
    ofstream file("data/books.txt");
@@ -114,12 +119,18 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
       cout << "Enter borrower name: ";
       getline(cin, borrowerName);
 
-      if (borrowerName == ESC) return;
+      if (checkExit(borrowerName)) {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       cout << "Enter book title (multiple allowed, split by comma): ";
       getline(cin, bookTitle);
 
-      if (bookTitle == ESC) return;
+      if (checkExit(bookTitle)) {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
 
       // ------------------ Split into array ------------------
       string titles[20];  // max 20 books in 1 transaction
@@ -290,7 +301,7 @@ void bookInventory(const std::vector<Book>& books,
       std::cout << "Author         : " << book.author << std::endl;
       std::cout << "ISBN           : " << book.isbn << std::endl;
       std::cout << "Total Copies   : " << book.copies << std::endl;
-      
+
       if (available == 0) {
          cout << RED << "Available      : " << available << RESET << endl;
       } else {
@@ -334,10 +345,24 @@ void addBook(vector<Book>& books) {
    cout << "\n=== Add New Book ===" << endl;
    cout << "Enter book title: ";
    getline(cin, newBook.title);
+   if (checkExit(newBook.title)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    cout << "Enter author name: ";
    getline(cin, newBook.author);
+   if (checkExit(newBook.author)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    cout << "Enter ISBN: ";
    getline(cin, newBook.isbn);
+   if (checkExit(newBook.isbn)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
 
    // Check for duplicate ISBN (no update logic)
    for (const auto& book : books) {
@@ -400,29 +425,28 @@ void addBorrower(vector<Borrower>& borrowers) {
 
       cout << "Enter Full Name (or type'exit' to return): ";
       getline(cin, b.name);
-      if (b.name == "exit" || b.name == "Exit" || b.name == "EXIT") {
+      if (checkExit(b.name)) {
          cout << "\nReturning to main menu...\n";
          return;
       }
 
       cout << "Enter Address (or type'exit' to return): ";
       getline(cin, b.address);
-      if (b.address == "exit" || b.address == "Exit" || b.address == "EXIT") {
+      if (checkExit(b.address)) {
          cout << "\nReturning to main menu...\n";
          return;
       }
 
       cout << "Enter Contact Number (or type'exit' to return): ";
       getline(cin, b.contact);
-      if (b.contact == "exit" || b.contact == "Exit" || b.contact == "EXIT") {
+      if (checkExit(b.contact)) {
          cout << "\nReturning to main menu...\n";
          return;
       }
 
       cout << "Enter ID Number (or type'exit' to return): ";
       getline(cin, b.ic_no);
-      if (b.ic_no == "exit" || b.ic_no == "Exit" || b.ic_no == "EXIT") return;
-      if (b.ic_no == "exit" || b.ic_no == "Exit" || b.ic_no == "EXIT") {
+      if (checkExit(b.ic_no)) {
          cout << "\nReturning to main menu...\n";
          return;
       }
@@ -444,8 +468,7 @@ void addBorrower(vector<Borrower>& borrowers) {
       cin >> choice;
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-      if (choice == "exit" || choice == "Exit" || choice == "EXIT" ||
-          choice == "n" || choice == "N") {
+      if (checkExit(choice) || choice == "n" || choice == "N") {
          cout << "\nReturning to main menu...\n";
          break;
       }
@@ -560,9 +583,10 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       cout << "\nEnter Borrower ID (type 'exit' to return): ";
       cin >> borrowerInput;
 
-      if (borrowerInput == "exit" || borrowerInput == "Exit" ||
-          borrowerInput == "EXIT")
+      if (checkExit(borrowerInput)) {
+         cout << "\nReturning to main menu...\n";
          return;
+      }
 
       bool isNumeric =
           all_of(borrowerInput.begin(), borrowerInput.end(), ::isdigit);
@@ -613,7 +637,7 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       cout << "\nEnter Book ID (or type 'exit' to finish): ";
       cin >> input;
 
-      if (input == "exit" || input == "Exit" || input == "EXIT") {
+      if (checkExit(input)) {
          if (!borrowedBooks.empty()) {
             break;
          } else {
@@ -871,6 +895,11 @@ void addAdmin(vector<User>& users) {
    cout << "Enter new admin username: ";
    cin >> username;
 
+   if (checkExit(username)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    // check duplicate username
    for (auto& u : users) {
       if (u.username == username) {
@@ -882,6 +911,11 @@ void addAdmin(vector<User>& users) {
 
    cout << "Enter password: ";
    cin >> password;
+
+   if (checkExit(password)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
 
    cout << "\nSelect Role:\n1. super_admin\n2. admin\nChoose: ";
    cin >> roleChoice;
@@ -916,10 +950,21 @@ void resetUserPassword(vector<User>& users) {
    cout << "Enter username to reset password: ";
    cin >> targetUser;
 
+   if (checkExit(targetUser)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    for (auto& u : users) {
       if (u.username == targetUser) {
          cout << "Enter new password: ";
          cin >> u.password;
+
+         if (checkExit(u.password)) {
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+
          u.attempts = 0;
          u.locked = 0;
          saveUsers(users);
@@ -936,6 +981,11 @@ void changePassword(User& currentUser, vector<User>& users) {
    cout << "Enter current password: ";
    cin >> oldPass;
 
+   if (checkExit(oldPass)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    if (oldPass != currentUser.password) {
       cout << RED << "Wrong password." << RESET << "\n";
       return;
@@ -943,6 +993,12 @@ void changePassword(User& currentUser, vector<User>& users) {
 
    cout << "Enter new password: ";
    cin >> newPass;
+
+   if (checkExit(newPass)) {
+      cout << "\nReturning to main menu...\n";
+      return;
+   }
+
    currentUser.password = newPass;
 
    updateUser(currentUser, users);

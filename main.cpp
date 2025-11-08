@@ -1,15 +1,16 @@
 #include <algorithm>   // for transform()
+#include <cctype>      // for isdigit()
 #include <ctime>       // for time functions
 #include <filesystem>  // For file existence check
 #include <fstream>     // For file operations
 #include <iomanip>     // for setw()
 #include <iostream>    // For input/output
 #include <limits>      // For numeric_limits
-#include <sstream>     // For splitting text lines
-#include <string>      // For string operations
-#include <vector>      // For using vectors
-#include <variant>     // For using variant
-#include <cctype>      // for isdigit()
+#include <map>
+#include <sstream>  // For splitting text lines
+#include <string>   // For string operations
+#include <variant>  // For using variant
+#include <vector>   // For using vectors
 
 using namespace std;
 
@@ -263,6 +264,47 @@ void returnBook(vector<Borrower>& borrowers, vector<Book>& books,
    }
 }
 
+void bookInventory(const std::vector<Book>& books,
+                   const std::vector<BorrowRecord>& borrowRecords) {
+   if (books.empty()) {
+      std::cout << "\nNo books in inventory.\n";
+   }
+
+   for (const auto& book : books) {
+      int checkedOut = 0;
+
+      // Count borrowed copies
+      for (const auto& record : borrowRecords) {
+         if (record.book_id == book.id && record.status == 1) {
+            checkedOut += record.quantity;
+         }
+      }
+
+      int available = book.copies - checkedOut;
+      if (available < 0) available = 0;
+
+      // ---------- Display Section ----------
+      std::cout << "\n----------------------------------------\n";
+      std::cout << "Book ID.       : " << book.id << std::endl;
+      std::cout << "Title          : " << book.title << std::endl;
+      std::cout << "Author         : " << book.author << std::endl;
+      std::cout << "ISBN           : " << book.isbn << std::endl;
+      std::cout << "Total Copies   : " << book.copies << std::endl;
+      
+      if (available == 0) {
+         cout << RED << "Available      : " << available << RESET << endl;
+      } else {
+         cout << GREEN << "Available      : " << available << RESET << endl;
+      }
+   }
+
+   std::cout << "\n----------------------------------------\n";
+   std::cout << "Press Enter to return to the main menu...";
+
+   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+   std::cin.get();
+}
+
 // === End ===
 
 // === Adrian ===
@@ -401,9 +443,9 @@ void addBorrower(vector<Borrower>& borrowers) {
       cout << "\nAdd another borrower?(Y/N or type'exit' to return): ";
       cin >> choice;
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
-      
-      if (choice == "exit" || choice == "Exit" || choice == "EXIT" || 
-         choice == "n" || choice == "N") {
+
+      if (choice == "exit" || choice == "Exit" || choice == "EXIT" ||
+          choice == "n" || choice == "N") {
          cout << "\nReturning to main menu...\n";
          break;
       }
@@ -420,14 +462,14 @@ void displayBorrowers(vector<Borrower>& borrowers) {
    }
 
    cout << string(85, '-') << "\n";
-   cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20) 
+   cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20)
         << "IC Number" << setw(18) << "Contact" << "Address\n";
    cout << string(85, '-') << "\n";
 
    for (auto& b : borrowers) {
       cout << left << setw(5) << b.id << setw(25) << b.name << setw(20)
            << b.ic_no << setw(18) << b.contact << b.address << "\n";
-    }
+   }
    cout << string(85, '-') << "\n";
 
    cout << "\nPress Enter to return to menu...";
@@ -435,118 +477,118 @@ void displayBorrowers(vector<Borrower>& borrowers) {
    cin.get();
 }
 
-bool isNumber(const string &s) {
-    for (char c : s)
-        if (!isdigit(c)) return false;
-    return !s.empty();
-   }
-
-// ---------------- Display borrowers with borrow records----------------
-void displayBorrowersWithBooks(vector<Borrower>& borrowers, 
-                               vector<Book>& books, 
-                               vector<BorrowRecord>& borrow_records) {
-    cout << YELLOW << "\n======== List of Borrowed Books ========\n" << RESET;
-
-    if (borrowers.empty()) {
-        cout << RED << "No borrower records found!" << RESET << endl;
-        return;
-   }
-
-    for (const auto& borrower : borrowers) {
-        cout << "\n" << string(90, '-') << "\n";
-        cout << GREEN << "Borrower ID: " << borrower.id << RESET << endl;
-        cout << "Name    : " << borrower.name << endl;
-        cout << "Address : " << borrower.address << endl;
-        cout << "Contact : " << borrower.contact << endl;
-        cout << "ID Number : " << borrower.ic_no << endl;
-
-        // Find all records this borrower has borrowed but not yet returned
-        bool hasBorrowed = false;
-        for (const auto& record : borrow_records) {
-            if (record.borrower_id == borrower.id && record.status == 0) {
-                hasBorrowed = true;
-                // Find the book title
-                string bookTitle = "Unknown";
-                for (const auto& book : books) {
-                    if (book.id == record.book_id) {
-                        bookTitle = book.title;
-                        break;
-                    }
-                }
-
-                cout << "   - " << bookTitle 
-                     << " (Borrowed on: " << record.borrow_date
-                     << ", Due: " << record.due_date << ")" << endl;
-            }
-        }
-
-        if (!hasBorrowed) {
-            cout << RED << "No books currently borrowed." << RESET << endl;
-        }
-    }
-
-    cout << "\n" << string(90, '-') << "\n";
-    cout << "Press Enter to return to the main menu...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    cin.get();
+bool isNumber(const string& s) {
+   for (char c : s)
+      if (!isdigit(c)) return false;
+   return !s.empty();
 }
 
+// ---------------- Display borrowers with borrow records----------------
+void displayBorrowersWithBooks(vector<Borrower>& borrowers, vector<Book>& books,
+                               vector<BorrowRecord>& borrow_records) {
+   cout << YELLOW << "\n======== List of Borrowed Books ========\n" << RESET;
+
+   if (borrowers.empty()) {
+      cout << RED << "No borrower records found!" << RESET << endl;
+      return;
+   }
+
+   for (const auto& borrower : borrowers) {
+      cout << "\n" << string(90, '-') << "\n";
+      cout << GREEN << "Borrower ID: " << borrower.id << RESET << endl;
+      cout << "Name    : " << borrower.name << endl;
+      cout << "Address : " << borrower.address << endl;
+      cout << "Contact : " << borrower.contact << endl;
+      cout << "ID Number : " << borrower.ic_no << endl;
+
+      // Find all records this borrower has borrowed but not yet returned
+      bool hasBorrowed = false;
+      for (const auto& record : borrow_records) {
+         if (record.borrower_id == borrower.id && record.status == 0) {
+            hasBorrowed = true;
+            // Find the book title
+            string bookTitle = "Unknown";
+            for (const auto& book : books) {
+               if (book.id == record.book_id) {
+                  bookTitle = book.title;
+                  break;
+               }
+            }
+
+            cout << "   - " << bookTitle
+                 << " (Borrowed on: " << record.borrow_date
+                 << ", Due: " << record.due_date << ")" << endl;
+         }
+      }
+
+      if (!hasBorrowed) {
+         cout << RED << "No books currently borrowed." << RESET << endl;
+      }
+   }
+
+   cout << "\n" << string(90, '-') << "\n";
+   cout << "Press Enter to return to the main menu...";
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
+   cin.get();
+}
 
 // === JY ===
 void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
                      vector<BorrowRecord>& borrow_records) {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    vector<pair<int, string>> borrowedBooks;
-    string borrowerName;
-    int borrowerId = -1;
-    cout << YELLOW << "\n======== Borrow Book ========\n" << RESET;
+   cin.ignore(numeric_limits<streamsize>::max(), '\n');
+   vector<pair<int, string>> borrowedBooks;
+   string borrowerName;
+   int borrowerId = -1;
+   cout << YELLOW << "\n======== Borrow Book ========\n" << RESET;
 
-    // Display borrowers
-    cout << "\nAvailable Borrowers:\n";
-    cout << string(85, '-') << "\n";
-    cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20)
-         << "IC Number" << setw(18) << "Contact" << "Address\n";
-    cout << string(85, '-') << "\n";
+   // Display borrowers
+   cout << "\nAvailable Borrowers:\n";
+   cout << string(85, '-') << "\n";
+   cout << left << setw(5) << "ID" << setw(25) << "Name" << setw(20)
+        << "IC Number" << setw(18) << "Contact" << "Address\n";
+   cout << string(85, '-') << "\n";
 
-    for (const auto& b : borrowers) {
-        cout << left << setw(5) << b.id << setw(25) << b.name << setw(20)
-             << b.ic_no << setw(18) << b.contact << b.address << "\n";
-    }
-    cout << string(85, '-') << "\n";
+   for (const auto& b : borrowers) {
+      cout << left << setw(5) << b.id << setw(25) << b.name << setw(20)
+           << b.ic_no << setw(18) << b.contact << b.address << "\n";
+   }
+   cout << string(85, '-') << "\n";
 
-    // ===== Borrower Input =====
-    while (true) {
-        string borrowerInput;
-        cout << "\nEnter Borrower ID (type 'exit' to return): ";
-        cin >> borrowerInput;
+   // ===== Borrower Input =====
+   while (true) {
+      string borrowerInput;
+      cout << "\nEnter Borrower ID (type 'exit' to return): ";
+      cin >> borrowerInput;
 
-        if (borrowerInput == "exit" || borrowerInput == "Exit" || borrowerInput == "EXIT")
-            return;
+      if (borrowerInput == "exit" || borrowerInput == "Exit" ||
+          borrowerInput == "EXIT")
+         return;
 
-        bool isNumeric = all_of(borrowerInput.begin(), borrowerInput.end(), ::isdigit);
-        if (!isNumeric) {
-            cout << RED << "Invalid borrower ID!" << RESET << "\n";
-            continue;
-        }
+      bool isNumeric =
+          all_of(borrowerInput.begin(), borrowerInput.end(), ::isdigit);
+      if (!isNumeric) {
+         cout << RED << "Invalid borrower ID!" << RESET << "\n";
+         continue;
+      }
 
-        borrowerId = stoi(borrowerInput);
-        bool found = false;
-        for (const auto& b : borrowers) {
-            if (b.id == borrowerId) {
-                borrowerName = b.name;
-                found = true;
-                break;
-            }
-        }
+      borrowerId = stoi(borrowerInput);
+      bool found = false;
+      for (const auto& b : borrowers) {
+         if (b.id == borrowerId) {
+            borrowerName = b.name;
+            found = true;
+            break;
+         }
+      }
 
-        if (!found) {
-            cout << RED << "Invalid borrower ID!" << RESET << "\n";
-            continue;
-        }
+      if (!found) {
+         cout << RED << "Invalid borrower ID!" << RESET << "\n";
+         continue;
+      }
 
-        break; // valid borrower
-    }
-// === Book Borrowing Section ===
+      break;  // valid borrower
+   }
+   // === Book Borrowing Section ===
    bool showBookList = true;
 
    while (true) {
@@ -564,7 +606,7 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
          }
          cout << string(85, '-') << "\n";
          cout << RED << "Note: Red items are out of stock" << RESET << "\n";
-         showBookList = false; // only show once unless borrow again
+         showBookList = false;  // only show once unless borrow again
       }
 
       string input;
@@ -572,10 +614,9 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       cin >> input;
 
       if (input == "exit" || input == "Exit" || input == "EXIT") {
-         if (!borrowedBooks.empty()){
+         if (!borrowedBooks.empty()) {
             break;
-         }
-         else{
+         } else {
             return;
          }
       }
@@ -593,8 +634,10 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       for (auto& b : books) {
          if (b.id == bookId) {
             found = true;
-            if (b.copies > 0) selectedBook = &b;
-            else outOfStock = true;
+            if (b.copies > 0)
+               selectedBook = &b;
+            else
+               outOfStock = true;
             break;
          }
       }
@@ -642,31 +685,30 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
       if (tolower(more) == 'y') {
-         showBookList = true; // redisplay book list
+         showBookList = true;  // redisplay book list
          continue;
-      } else break;
+      } else
+         break;
    }
 
-  // === Summary ===
-if (!borrowedBooks.empty()) {
-    cout << "\n" << string(40, '-') << "\n";
-    cout << borrowerName << " borrowed:\n\n";
-    for (const auto& book : borrowedBooks)
-        cout << book.second << "\n";
-    cout << string(40, '-') << "\n";
+   // === Summary ===
+   if (!borrowedBooks.empty()) {
+      cout << "\n" << string(40, '-') << "\n";
+      cout << borrowerName << " borrowed:\n\n";
+      for (const auto& book : borrowedBooks) cout << book.second << "\n";
+      cout << string(40, '-') << "\n";
 
-    updateBorrowRecords(borrow_records);
-    updateBooks(books);
+      updateBorrowRecords(borrow_records);
+      updateBooks(books);
 
-    cout << "\nBook issued successfully\nPress Enter to return to menu...";
-    
-    // clear leftover newline from previous input
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    // wait for user to press Enter only once
-    cin.get();
+      cout << "\nBook issued successfully\nPress Enter to return to menu...";
+
+      // clear leftover newline from previous input
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      // wait for user to press Enter only once
+      cin.get();
+   }
 }
-}
-
 
 // === End ===
 
@@ -938,6 +980,7 @@ void adminMenu(User& currentUser, vector<User>& users,
       menu.push_back({optionNumber++, "Return Book"});
       menu.push_back({optionNumber++, "Borrower List"});
       menu.push_back({optionNumber++, "List of Borrowed Books"});
+      menu.push_back({optionNumber++, "List of Book Inventory"});
       menu.push_back({optionNumber++, "Change Password"});
       menu.push_back({optionNumber++, "Quit"});
 
@@ -994,8 +1037,9 @@ void adminMenu(User& currentUser, vector<User>& users,
          displayBorrowers(borrowers);
       } else if (selected == "List of Borrowed Books") {
          displayBorrowersWithBooks(borrowers, books, borrow_records);
+      } else if (selected == "List of Book Inventory") {
+         bookInventory(books, borrow_records);
       }
-      
    }
 }
 

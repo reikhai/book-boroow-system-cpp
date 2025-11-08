@@ -377,14 +377,7 @@ void addBook(vector<Book>& books) {
 
    // Check for duplicate ISBN (no update logic)
    for (const auto& book : books) {
-      string existingIsbn = book.isbn;
-      // Remove spaces from saved ISBN
-      while (!existingIsbn.empty() && existingIsbn.front() == ' ')
-         existingIsbn.erase(0, 1);
-      while (!existingIsbn.empty() && existingIsbn.back() == ' ')
-         existingIsbn.pop_back();
-
-      if (existingIsbn == newBook.isbn) {
+      if (book.isbn == newBook.isbn) {
          cout << RED << "\nBook with ISBN " << newBook.isbn
               << " already exists in the system.\n"
               << RESET;

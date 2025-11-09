@@ -697,7 +697,6 @@ void addBorrowRecord(vector<Borrower>& borrowers, vector<Book>& books,
       char more;
       cout << "\nBorrow another book? (y/n): ";
       cin >> more;
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
       if (tolower(more) == 'y') {
          showBookList = true;  // redisplay book list

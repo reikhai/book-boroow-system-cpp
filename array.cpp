@@ -1149,12 +1149,22 @@ int main() {
 
    while (true) {
       User u;
-      string inputUser, inputPass;
 
-      cout << "\n==== Book Borrowing System ====\n";
-      cout << "Username: ";
+      const string SYSTEM_TITLE = "Book Borrowing System";
+
+      // center title
+      int leftPad = (WIDTH - SYSTEM_TITLE.size()) / 2;
+      int rightPad = WIDTH - SYSTEM_TITLE.size() - leftPad;
+
+      cout << "+" << string(WIDTH, '-') << "+\n";
+      cout << "|" << string(leftPad, ' ') << SYSTEM_TITLE
+           << string(rightPad, ' ') << "|\n";
+      cout << "+" << string(WIDTH, '-') << "+";
+
+      string inputUser, inputPass;
+      cout << "\nEnter Username: ";
       cin >> inputUser;
-      cout << "Password: ";
+      cout << "Enter Password: ";
       cin >> inputPass;
 
       if (!getUser(inputUser, u)) {

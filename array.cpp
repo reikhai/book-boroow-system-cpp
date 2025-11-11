@@ -191,6 +191,32 @@ void returnBook() {
          continue;
       }
 
+      // ===== CHECK IF ALL TITLES EXIST =====
+      bool allValid = true;
+      for (int i = 0; i < titleCount; i++) {
+         string titleOne = titles[i];
+         bool exists = false;
+
+         for (int j = 0; j < bookCount; j++) {
+            if (books[j].title == titleOne) {
+               exists = true;
+               break;
+            }
+         }
+
+         if (!exists) {
+            cout << RED << "Book \"" << titleOne << "\" not found. Try again.\n"
+                 << RESET;
+            allValid = false;
+            break;
+         }
+      }
+
+      if (!allValid) {
+         cout << RED << "Please re-enter book titles.\n" << RESET;
+         continue;  // go back to ask title input again
+      }
+
       bool anyReturned = false;
       int totalFine = 0;
       string lateDetails[20];
@@ -272,6 +298,8 @@ void returnBook() {
          cout << GREEN << "Payment received.\n" << RESET;
       }
 
+      updateBooks();
+      updateBorrowRecords();
       cout << GREEN << "\nReturn process completed.\n" << RESET;
 
       cout << "\nReturn another? (y/n): ";
@@ -392,11 +420,36 @@ void addBook() {
       break;
    }
 
-   cout << "Enter number of copies: ";
-   while (!(cin >> newBook.copies) || newBook.copies <= 0) {
-      cout << RED << "Invalid input. Enter positive number: " << RESET;
-      cin.clear();
-      cin.ignore(10000, '\n');
+   cout << "Enter number of copies (or type 'exit' to return): ";
+
+   while (true) {
+      string copies_input;
+      cin >> copies_input;
+
+      if (checkExit(copies_input)) {
+         // restore data
+         for (int i = 0; i < bookCountBackup; i++) books[i] = booksBackup[i];
+         bookCount = bookCountBackup;
+
+         cout << "\nReturning to main menu...\n";
+         cin.ignore(numeric_limits<streamsize>::max(), '\n');
+         return;
+      }
+
+      // check numeric
+      bool isNum = all_of(copies_input.begin(), copies_input.end(), ::isdigit);
+      if (!isNum) {
+         cout << RED << "Invalid input. Enter a positive number: " << RESET;
+         continue;
+      }
+
+      newBook.copies = stoi(copies_input);
+      if (newBook.copies <= 0) {
+         cout << RED << "Copies must be greater than 0: " << RESET;
+         continue;
+      }
+
+      break;  // valid number, exit loop
    }
 
    newBook.id = (bookCount == 0 ? 1 : books[bookCount - 1].id + 1);
@@ -894,61 +947,95 @@ void addAdmin() {
    string username, password;
    int roleChoice;
 
-   cout << "\n=== Add New Admin ===\n";
-   cout << "Enter new admin username (or type'exit' to return): ";
-   cin >> username;
+   while (true) {
+      cout << "\n=== Add New Admin ===\n";
+      cout << "Enter new admin username (or type'exit' to return): ";
+      cin >> username;
 
-   if (checkExit(username)) {
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
-
-   for (int i = 0; i < userCount; i++) {
-      if (users[i].username == username) {
-         cout << RED << "Username already exists.\n" << RESET;
+      if (checkExit(username)) {
+         cout << "\nReturning to main menu...\n";
          return;
       }
+
+      bool exists = false;
+      for (int i = 0; i < userCount; i++) {
+         if (users[i].username == username) {
+            exists = true;
+            break;
+         }
+      }
+
+      if (exists) {
+         cout << RED
+              << "Username already exists. Please enter a different username.\n"
+              << RESET;
+         continue;
+      }
+
+      cout << "Enter password (or type'exit' to return): ";
+      cin >> password;
+
+      if (checkExit(password)) {
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
+
+      string type;
+      while (true) {
+         cout << "\nSelect Role:\n1. super_admin\n2. admin\n3. exit\nChoose: ";
+
+         if (!(cin >> roleChoice)) {  // is not a number
+            cin.clear();              // clear error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << RED << "Invalid input. Please enter a number (1 or 2).\n"
+                 << RESET;
+            continue;
+         }
+
+         if (roleChoice == 1) {
+            type = "super_admin";
+            break;
+         } else if (roleChoice == 2) {
+            type = "admin";
+            break;
+         } else if (roleChoice == 3) {
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+
+         cout << RED << "Invalid choice. Please enter 1 , 2 or 3.\n" << RESET;
+      }
+      
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+      User u;
+      u.id = (userCount == 0 ? 1 : users[userCount - 1].id + 1);
+      u.username = username;
+      u.password = password;
+      u.attempts = 0;
+      u.locked = 0;
+      u.type = type;
+
+      time_t now = time(0);
+      char buffer[20];
+      strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&now));
+      u.created_at = buffer;
+
+      users[userCount++] = u;
+      saveUsers();
+
+      cout << GREEN << "Admin added successfully.\n" << RESET;
+
+      string choice;
+      cout << "\nAdd another admin?(Y/N or type'exit' to return): ";
+      cin >> choice;
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+      if (checkExit(choice) || choice == "n" || choice == "N") {
+         cout << "\nReturning to main menu...\n";
+         break;
+      }
    }
-
-   cout << "Enter password (or type'exit' to return): ";
-   cin >> password;
-
-   if (checkExit(password)) {
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
-
-   cout << "\nSelect Role:\n1. super_admin\n2. admin\nChoose: ";
-   cin >> roleChoice;
-
-   if (roleChoice != 1 && roleChoice != 2) {
-      cout << RED << "Invalid choice.." << RESET << "\n";
-      return;
-   }
-
-   string type = (roleChoice == 1 ? "super_admin" : "admin");
-
-   User u;
-   u.id = (userCount == 0 ? 1 : users[userCount - 1].id + 1);
-   u.username = username;
-   u.password = password;
-   u.attempts = 0;
-   u.locked = 0;
-   u.type = type;
-
-   time_t now = time(0);
-   char buffer[20];
-   strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&now));
-   u.created_at = buffer;
-
-   users[userCount++] = u;
-   saveUsers();
-
-   cout << GREEN << "Admin added successfully.\n" << RESET;
-
-   cout << "\nPress Enter to return to menu...";
-   cin.ignore(numeric_limits<streamsize>::max(), '\n');
-   cin.get();
 }
 
 void resetUserPassword() {

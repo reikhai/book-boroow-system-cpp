@@ -155,7 +155,8 @@ void returnBook() {
          continue;
       }
 
-      cout << "Enter Book Titles (comma separated) (or 'exit'): ";
+      cout << "Enter book title (multiple allowed, split by comma) (or "
+              "type'exit' to return): ";
       getline(cin, bookTitle);
 
       if (checkExit(bookTitle)) {
@@ -551,11 +552,11 @@ void addBorrower() {
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
 
       string choice;
-      cout << "\nAdd another borrower? (Y/N): ";
+      cout << "\nAdd another borrower?(Y/N or type'exit' to return): ";
       cin >> choice;
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-      if (choice == "n" || choice == "N") {
+      if (checkExit(choice) || choice == "n" || choice == "N") {
          cout << "\nReturning to main menu...\n";
          break;
       }
@@ -603,7 +604,7 @@ void displayBorrowersWithBooks() {
    }
 
    cout << "\n" << string(90, '-') << "\n";
-   cout << "Press Enter to return...";
+   cout << "Press Enter to return to the main menu...";
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
    cin.get();
 }
@@ -643,7 +644,7 @@ void addBorrowRecord() {
    // Borrower Input
    while (true) {
       string borrowerInput;
-      cout << "\nEnter Borrower ID (or 'exit'): ";
+      cout << "\nEnter Borrower ID (type 'exit' to return): ";
       cin >> borrowerInput;
 
       if (checkExit(borrowerInput)) {
@@ -1005,7 +1006,7 @@ void addAdmin() {
 
          cout << RED << "Invalid choice. Please enter 1 , 2 or 3.\n" << RESET;
       }
-      
+
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
       User u;

@@ -324,11 +324,11 @@ void bookInventory() {
       return;
    }
 
-   cout << left << setw(6) << "ID" << setw(30) << "Title" << setw(22)
-        << "Author" << setw(15) << "ISBN" << setw(12) << "Total" << setw(12)
-        << "Borrowed" << setw(12) << "Available" << "\n";
+   cout << left << setw(6) << "ID" << setw(32) << "Title" << setw(25)
+        << "Author" << setw(18) << "ISBN" << setw(15) << "Total" << setw(15)
+        << "Borrowed" << setw(15) << "Available" << "\n";
 
-   cout << string(109, '-') << "\n";
+   cout << string(120, '-') << "\n";
 
    for (int i = 0; i < bookCount; i++) {
       int borrowedCount = 0;
@@ -342,16 +342,16 @@ void bookInventory() {
       if (available < 0) available = 0;
 
       cout << left << setw(6) << books[i].id << setw(30) << books[i].title
-           << setw(22) << books[i].author << setw(15) << books[i].isbn
-           << setw(12) << books[i].copies << setw(12) << borrowedCount;
+           << setw(22) << books[i].author << setw(25) << books[i].isbn
+           << setw(15) << books[i].copies << setw(15) << borrowedCount;
 
       if (available == 0)
-         cout << RED << setw(12) << available << RESET << "\n";
+         cout << RED << setw(15) << available << RESET << "\n";
       else
-         cout << GREEN << setw(12) << available << RESET << "\n";
+         cout << GREEN << setw(15) << available << RESET << "\n";
    }
 
-   cout << "\n" << string(109, '-') << "\n";
+   cout << "\n" << string(120, '-') << "\n";
    cout << "Press Enter to return...";
 
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1044,103 +1044,121 @@ void resetUserPassword() {
    User usersBackup[20];
    for (int i = 0; i < userCount; i++) usersBackup[i] = users[i];
 
-   string targetUser;
-   cout << "\n=== Reset User Password ===\n";
-   cout << "Enter username to reset password (or 'exit'): ";
-   cin >> targetUser;
+   while (true) {
+      cout << "\n=== Reset User Password ===\n";
+      cout << "Enter username to reset password (or type 'exit' to return): ";
 
-   if (checkExit(targetUser)) {
-      // restore backup
-      for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
+      string targetUser;
+      cin >> targetUser;
 
-   // find user
-   int idx = -1;
-   for (int i = 0; i < userCount; i++) {
-      if (users[i].username == targetUser) {
-         idx = i;
-         break;
+      if (checkExit(targetUser)) {
+         // restore backup
+         for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
+         cout << "\nReturning to main menu...\n";
+         return;
       }
-   }
 
-   if (idx == -1) {
-      cout << RED << "User not found.\n" << RESET;
+      // find user
+      int idx = -1;
+      for (int i = 0; i < userCount; i++) {
+         if (users[i].username == targetUser) {
+            idx = i;
+            break;
+         }
+      }
+
+      if (idx == -1) {
+         cout << RED << "User not found. Please try again.\n" << RESET;
+         continue;
+      }
+
+      // ---- Found User ----
+      cout << "Enter new password (or type 'exit' to return): ";
+      string newPass;
+      cin >> newPass;
+
+      if (checkExit(newPass)) {
+         // restore backup
+         for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
+
+      users[idx].password = newPass;
+      users[idx].attempts = 0;
+      users[idx].locked = 0;
+
+      saveUsers();
+      cout << GREEN << "Password reset successfully.\n" << RESET;
+
+      cout << "\nPress ENTER to return to main menu...\n";
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      cin.get();
       return;
    }
-
-   cout << "Enter new password (or 'exit'): ";
-   string newPass;
-   cin >> newPass;
-
-   if (checkExit(newPass)) {
-      // restore backup
-      for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
-
-   // apply changes
-   users[idx].password = newPass;
-   users[idx].attempts = 0;
-   users[idx].locked = 0;
-
-   saveUsers();
-
-   cout << GREEN << "\nPassword reset successfully.\n" << RESET;
 }
 
 void changePassword(User& currentUser) {
    // --- Backup for rollback on exit ---
    User usersBackup[20];
+
+   for (int i = 0; i < userCount; i++)
+      users[i] = users[i];
    for (int i = 0; i < userCount; i++) usersBackup[i] = users[i];
 
    User currentUserBackup = currentUser;
 
-   string oldPass, newPass;
-
    cout << "\n=== Change Your Password ===\n";
 
-   cout << "Enter current password (or 'exit'): ";
-   cin >> oldPass;
+   while (true) {
+      string oldPass;
+      cout << "Enter current password (or type 'exit' to return): ";
+      cin >> oldPass;
 
-   if (checkExit(oldPass)) {
-      // restore backup
-      currentUser = currentUserBackup;
-      for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
-
-   if (oldPass != currentUser.password) {
-      cout << RED << "Wrong current password.\n" << RESET;
-      return;
-   }
-
-   cout << "Enter new password (or 'exit'): ";
-   cin >> newPass;
-
-   if (checkExit(newPass)) {
-      // restore backup
-      currentUser = currentUserBackup;
-      for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
-      cout << "\nReturning to main menu...\n";
-      return;
-   }
-
-   // Apply change
-   currentUser.password = newPass;
-   for (int i = 0; i < userCount; i++) {
-      if (users[i].id == currentUser.id) {
-         users[i].password = newPass;
-         break;
+      if (checkExit(oldPass)) {
+         // restore backup
+         currentUser = currentUserBackup;
+         for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
+         cout << "\nReturning to main menu...\n";
+         return;
       }
+
+      if (oldPass != currentUser.password) {
+         cout << RED << "Wrong password. Please try again.\n" << RESET;
+         continue;
+      }
+
+      break;
    }
 
-   saveUsers();
+   while (true) {
+      string newPass;
+      cout << "Enter new password (or type 'exit' to return): ";
+      cin >> newPass;
 
-   cout << GREEN << "Password changed successfully.\n" << RESET;
+      if (checkExit(newPass)) {
+         // restore backup
+         currentUser = currentUserBackup;
+         for (int i = 0; i < userCount; i++) users[i] = usersBackup[i];
+         cout << "\nReturning to main menu...\n";
+         return;
+      }
+
+      currentUser.password = newPass;
+      for (int i = 0; i < userCount; i++) {
+         if (users[i].id == currentUser.id) {
+            users[i].password = newPass;
+            break;
+         }
+      }
+
+      saveUsers();
+      cout << GREEN << "Password updated successfully.\n" << RESET;
+      cout << "\nPress Enter to return to main menu...";
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      cin.get();
+      return;
+   }
 }
 
 void adminMenu(User& currentUser) {

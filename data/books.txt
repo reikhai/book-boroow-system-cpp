@@ -1,5 +1,10 @@
-1|Introduction to Algorithms|Thomas H. Cormen|9780262033848|4|2025-10-31 02:43:21
-2|Clean Code|Robert C. Martin|9780132350884|5|2025-10-31 02:43:21
-3|The Pragmatic Programmer|Andrew Hunt|9780201616224|3|2025-10-31 02:43:21
-4|Design Patterns|Erich Gamma|9780201633610|2|2025-10-31 02:43:21
-5|Effective C++|Scott Meyers|9780321334879|6|2025-10-31 02:43:21
+1 | Harry Potter | J.K. Rowling | 9780439554930 | 5 | 2025-01-05 10:22:15
+2 | The Lord of the Rings | J.R.R. Tolkien | 9780618640157 | 3 | 2025-01-05 10:23:10
+3 | The Hobbit | J.R.R. Tolkien | 9780547928227 | 4 | 2025-01-05 10:24:41
+4 | To Kill a Mockingbird | Harper Lee | 9780061120084 | 2 | 2025-01-05 10:26:08
+5 | 1984 | George Orwell | 9780451524935 | 6 | 2025-01-05 10:27:55
+6 | Pride and Prejudice | Jane Austen | 9781503290563 | 3 | 2025-01-05 10:28:47
+7 | The Great Gatsby | F. Scott Fitzgerald | 9780743273565 | 4 | 2025-01-05 10:29:33
+8 | The Catcher in the Rye | J.D. Salinger | 9780316769488 | 2 | 2025-01-05 10:30:12
+9 | The Hunger Games | Suzanne Collins | 9780439023528 | 5 | 2025-01-05 10:31:00
+10 | The Maze Runner | James Dashner | 9780385737951 | 3 | 2025-01-05 10:31:45

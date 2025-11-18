@@ -498,45 +498,78 @@ void addBorrower() {
       Borrower b;
       b.id = (borrowerCount == 0 ? 1 : borrowers[borrowerCount - 1].id + 1);
 
-      cout << "Enter Full Name (or 'exit' to return): ";
-      getline(cin, b.name);
-      if (checkExit(b.name)) {
-         // Restore original data
-         borrowerCount = borrowerCountBackup;
-         for (int i = 0; i < borrowerCount; i++)
-            borrowers[i] = borrowersBackup[i];
-         cout << "\nReturning to main menu...\n";
-         return;
+      while(true) {
+         cout << "Enter Full Name (or 'exit' to return): ";
+         getline(cin, b.name);
+         
+         if (checkExit(b.name)) {
+            // Restore original data
+            borrowerCount = borrowerCountBackup;
+            for (int i = 0; i < borrowerCount; i++)
+               borrowers[i] = borrowersBackup[i];
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+
+         if (b.name.empty()){
+            cout << RED << "Error: Name cannot be empty!\n" << RESET;
+            continue;
+         }
+         break;
       }
 
-      cout << "Enter Address (or 'exit' to return): ";
-      getline(cin, b.address);
-      if (checkExit(b.address)) {
-         borrowerCount = borrowerCountBackup;
-         for (int i = 0; i < borrowerCount; i++)
-            borrowers[i] = borrowersBackup[i];
-         cout << "\nReturning to main menu...\n";
-         return;
+      while (true) {
+         cout << "Enter Address (or 'exit' to return): ";
+         getline(cin, b.address);
+         
+         if (checkExit(b.address)) {
+            borrowerCount = borrowerCountBackup;
+            for (int i = 0; i < borrowerCount; i++)
+               borrowers[i] = borrowersBackup[i];
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+         if (b.address.empty()){
+            cout << RED << "Error: Address cannot be empty!\n" << RESET;
+            continue;
+         }
+         break;
       }
 
-      cout << "Enter Contact Number (or 'exit' to return): ";
-      getline(cin, b.contact);
-      if (checkExit(b.contact)) {
-         borrowerCount = borrowerCountBackup;
-         for (int i = 0; i < borrowerCount; i++)
-            borrowers[i] = borrowersBackup[i];
-         cout << "\nReturning to main menu...\n";
-         return;
+      while (true) {
+         cout << "Enter Contact Number (or 'exit' to return): ";
+         getline(cin, b.contact);
+         
+         if (checkExit(b.contact)) {
+            borrowerCount = borrowerCountBackup;
+            for (int i = 0; i < borrowerCount; i++)
+               borrowers[i] = borrowersBackup[i];
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+         if (b.contact.empty()){
+            cout << RED << "Error: Contact Number cannot be empty!\n" << RESET;
+            continue;
+         }
+         break;
       }
 
-      cout << "Enter IC Number (or 'exit' to return): ";
-      getline(cin, b.ic_no);
-      if (checkExit(b.ic_no)) {
-         borrowerCount = borrowerCountBackup;
-         for (int i = 0; i < borrowerCount; i++)
-            borrowers[i] = borrowersBackup[i];
-         cout << "\nReturning to main menu...\n";
-         return;
+      while (true){
+         cout << "Enter IC Number (or 'exit' to return): ";
+         getline(cin, b.ic_no);
+         
+         if (checkExit(b.ic_no)) {
+            borrowerCount = borrowerCountBackup;
+            for (int i = 0; i < borrowerCount; i++)
+               borrowers[i] = borrowersBackup[i];
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+       if (b.ic_no.empty()){
+            cout << RED << "Error: IC Number cannot be empty!\n" << RESET;
+            continue;
+         }
+         break;
       }
 
       // Timestamp

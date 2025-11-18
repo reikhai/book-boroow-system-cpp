@@ -585,14 +585,24 @@ void addBorrower() {
       cout << GREEN << "\nNew borrower added successfully!\n" << RESET;
 
       string choice;
-      cout << "\nAdd another borrower?(Y/N or type'exit' to return): ";
-      cin >> choice;
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-      if (checkExit(choice) || choice == "n" || choice == "N") {
-         cout << "\nReturning to main menu...\n";
-         break;
+      while (true) {
+         cout << "\nAdd another borrower?(Y/N): ";
+         cin >> choice;
+         cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+         if (choice == "Y" || choice == "y") {
+            break;
+         }
+
+         if (choice == "n" || choice == "N") {
+            cout << "\nReturning to main menu...\n";
+            return;
+         }
+
+         cout << RED << "Invalid input! Please enter only Y or N.\n" << RESET;
       }
+      continue;
    }
 }
 

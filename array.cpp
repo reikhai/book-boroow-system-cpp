@@ -111,6 +111,23 @@ void updateBorrowRecords() {
    }
 }
 
+string clean(const string& s) {
+   string out = s;
+
+   // remove \r
+   out.erase(remove(out.begin(), out.end(), '\r'), out.end());
+
+   // trim leading whitespace
+   while (!out.empty() && (out.front() == ' ' || out.front() == '\t'))
+      out.erase(out.begin());
+
+   // trim trailing whitespace
+   while (!out.empty() && (out.back() == ' ' || out.back() == '\t'))
+      out.pop_back();
+
+   return out;
+}
+
 void returnBook() {
    cin.ignore(numeric_limits<streamsize>::max(), '\n');
    clearScreen();
@@ -199,7 +216,7 @@ void returnBook() {
          bool exists = false;
 
          for (int j = 0; j < bookCount; j++) {
-            if (books[j].title == titleOne) {
+            if (clean(books[j].title) == clean(titleOne)) {
                exists = true;
                break;
             }
@@ -227,7 +244,7 @@ void returnBook() {
 
          int bookIdx = -1;
          for (int j = 0; j < bookCount; j++)
-            if (books[j].title == titleOne) bookIdx = j;
+            if (clean(books[j].title) == clean(titleOne)) bookIdx = j;
 
          if (bookIdx == -1) {
             cout << RED << "Book \"" << titleOne << "\" not found.\n" << RESET;
@@ -498,10 +515,10 @@ void addBorrower() {
       Borrower b;
       b.id = (borrowerCount == 0 ? 1 : borrowers[borrowerCount - 1].id + 1);
 
-      while(true) {
+      while (true) {
          cout << "Enter Full Name (or 'exit' to return): ";
          getline(cin, b.name);
-         
+
          if (checkExit(b.name)) {
             // Restore original data
             borrowerCount = borrowerCountBackup;
@@ -511,7 +528,7 @@ void addBorrower() {
             return;
          }
 
-         if (b.name.empty()){
+         if (b.name.empty()) {
             cout << RED << "Error: Name cannot be empty!\n" << RESET;
             continue;
          }
@@ -521,7 +538,7 @@ void addBorrower() {
       while (true) {
          cout << "Enter Address (or 'exit' to return): ";
          getline(cin, b.address);
-         
+
          if (checkExit(b.address)) {
             borrowerCount = borrowerCountBackup;
             for (int i = 0; i < borrowerCount; i++)
@@ -529,7 +546,7 @@ void addBorrower() {
             cout << "\nReturning to main menu...\n";
             return;
          }
-         if (b.address.empty()){
+         if (b.address.empty()) {
             cout << RED << "Error: Address cannot be empty!\n" << RESET;
             continue;
          }
@@ -539,7 +556,7 @@ void addBorrower() {
       while (true) {
          cout << "Enter Contact Number (or 'exit' to return): ";
          getline(cin, b.contact);
-         
+
          if (checkExit(b.contact)) {
             borrowerCount = borrowerCountBackup;
             for (int i = 0; i < borrowerCount; i++)
@@ -547,17 +564,17 @@ void addBorrower() {
             cout << "\nReturning to main menu...\n";
             return;
          }
-         if (b.contact.empty()){
+         if (b.contact.empty()) {
             cout << RED << "Error: Contact Number cannot be empty!\n" << RESET;
             continue;
          }
          break;
       }
 
-      while (true){
+      while (true) {
          cout << "Enter IC Number (or 'exit' to return): ";
          getline(cin, b.ic_no);
-         
+
          if (checkExit(b.ic_no)) {
             borrowerCount = borrowerCountBackup;
             for (int i = 0; i < borrowerCount; i++)
@@ -565,7 +582,7 @@ void addBorrower() {
             cout << "\nReturning to main menu...\n";
             return;
          }
-       if (b.ic_no.empty()){
+         if (b.ic_no.empty()) {
             cout << RED << "Error: IC Number cannot be empty!\n" << RESET;
             continue;
          }
@@ -1145,8 +1162,7 @@ void changePassword(User& currentUser) {
    // --- Backup for rollback on exit ---
    User usersBackup[20];
 
-   for (int i = 0; i < userCount; i++)
-      users[i] = users[i];
+   for (int i = 0; i < userCount; i++) users[i] = users[i];
    for (int i = 0; i < userCount; i++) usersBackup[i] = users[i];
 
    User currentUserBackup = currentUser;

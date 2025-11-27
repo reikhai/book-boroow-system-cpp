@@ -191,48 +191,22 @@ void returnBook() {
 
       for (char c : bookTitle) {
          if (c == ',') {
-            temp.erase(0, temp.find_first_not_of(" \t"));
-            temp.erase(temp.find_last_not_of(" \t") + 1);
-            if (!temp.empty()) titles[titleCount++] = temp;
+            string trimmed = clean(temp);
+            if (!trimmed.empty()) titles[titleCount++] = trimmed;
             temp.clear();
-         } else
+         } else {
             temp += c;
+         }
       }
+
       if (!temp.empty()) {
-         temp.erase(0, temp.find_first_not_of(" \t"));
-         temp.erase(temp.find_last_not_of(" \t") + 1);
-         titles[titleCount++] = temp;
+         string trimmed = clean(temp);
+         if (!trimmed.empty()) titles[titleCount++] = trimmed;
       }
 
       if (titleCount == 0) {
          cout << RED << "No valid book title entered." << RESET << "\n";
          continue;
-      }
-
-      // ===== CHECK IF ALL TITLES EXIST =====
-      bool allValid = true;
-      for (int i = 0; i < titleCount; i++) {
-         string titleOne = titles[i];
-         bool exists = false;
-
-         for (int j = 0; j < bookCount; j++) {
-            if (clean(books[j].title) == clean(titleOne)) {
-               exists = true;
-               break;
-            }
-         }
-
-         if (!exists) {
-            cout << RED << "Book \"" << titleOne << "\" not found. Try again.\n"
-                 << RESET;
-            allValid = false;
-            break;
-         }
-      }
-
-      if (!allValid) {
-         cout << RED << "Please re-enter book titles.\n" << RESET;
-         continue;  // go back to ask title input again
       }
 
       bool anyReturned = false;
